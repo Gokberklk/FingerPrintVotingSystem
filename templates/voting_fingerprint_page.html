@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<br>
+ <div class='box-form'>
+     <div class='box-login-tab'></div>
+     <div class='box-login-title'>
+         <div class='i i-login'></div><h2>LOGIN</h2>
+    </div>
+     <div class='box-login'>
+      <div class='fieldset-body' id='login_form'>
+        <p class='field'>
+            <form method="post">
+                <label for='voter_fingerprint'>SCAN FINGERPRINT</label>
+                <input type='image' id='voter_fingerprint' name='voter_fingerprint' title='Voter_Fingerprint' />
+            </form>
+        </p>
+        <input type='submit' id='do_login' value='CHECK FINGERPRINT' title='Get Started' />
+      </div>
+    </div>
+
+ </div>
+
+{% endblock %}
