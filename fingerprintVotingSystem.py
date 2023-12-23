@@ -18,7 +18,7 @@ def voting_fingerprint_page(): #Fingerprint identification screen
     result_of_entered_ID = cursor.fetchone()
     cursor.close()
     connection.close()
-    if int(entered_id) == result_of_entered_ID[0]:
+    if result_of_entered_ID != None and int(entered_id) == result_of_entered_ID[0]:
         return render_template('voting_fingerprint_page.html')
     else:
         return render_template('voting_id_page.html', error="Your ID does NOT exist!")
