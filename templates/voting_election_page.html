@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+{% block content %}
+
+<div>
+    <table class="table table-bordered" style="background-color: white; width: 20%; margin-left: 40px;margin-top: 40px;float: left; white-space: nowrap;">
+        <tr>
+            <th>Name</th>
+            <th>Surname</th>
+            <th>ID</th>
+            <th>Date of Birth</th>
+        </tr>
+        <tr>
+            <td>{{person[1]}}</td>
+            <td>{{person[2]}}</td>
+            <td>{{person[0]}}</td>
+            <td style="column-width: auto">{{person[3]}}</td>
+        </tr>
+    </table>
+    <table class="table table-bordered" style="background-color: white; width: 50%; margin-bottom: 30px; margin-top:40px; margin-right: 120px; float: right " align="center">
+        <tr>
+            <th>Election</th>
+            <th>Date</th>
+            <th>Time</th>
+        </tr>
+            <tr>
+                <td>{{elections}}</td>
+                <td>{{elections}}</td>
+                <td>{{elections}}</td>
+                <td>
+                    <form action="{{ url_for('voting_candidate_page')}}">
+                        <button class="btn btn-primary" name="election_id">Vote</button>
+                    </form>
+                </td>
+            </tr>
+    </table>
+</div>
+
+{% endblock %}
