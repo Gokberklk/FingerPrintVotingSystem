@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request
 import sqlite3
-citizen=None
-elections=None
+citizen = None
+candidates = None #This variable holds the candidates to be displayed.
+elections=None #This variable holds the elections to be displayed.
 Machine_ID=None
 # import DataBaseOperation
 import FingerPrintMatching
@@ -37,7 +38,7 @@ def voting_vote_page():
     # for the demo we can send two images from the database to check the functionality of the function
     #matching_result = FingerPrintMatching.Check_Fingerprint()
     #if matching_result:
-        return render_template('voting_election_page.html',person=citizen)
+        return render_template('voting_election_page.html',person=citizen,elections=elections)
    # else:
     #    return render_template('voting_id_page.html')
 

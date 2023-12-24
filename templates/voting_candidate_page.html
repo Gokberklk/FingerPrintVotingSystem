@@ -10,6 +10,11 @@
             <th>Name</th>
             <th>Surname</th>
         </tr>
+        {{% for candidate in candidates %}}
+            <td>{{candidate[]}}</td>
+            <td>{{candidate[]}}</td>
+            <td>{{candidate[]}}</td> <!--Image will be displayed here-->
+        {{% %}}
     </table>
 
 </body>
