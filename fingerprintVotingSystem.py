@@ -36,13 +36,22 @@ def voting_fingerprint_page():  # Fingerprint identification screen
 
 @app.route("/vote", methods=['POST', 'GET'])
 def voting_vote_page():
-    # the input values should be the Entered ID's fingerprint and machine fingerprint
-    # for the demo we can send two images from the database to check the functionality of the function
-    #matching_result = FingerPrintMatching.Check_Fingerprint()
-    #if matching_result:
+    #     the input values should be the Entered ID's fingerprint and machine fingerprint
+    #    for the demo we can send two images from the database to check the functionality of the function
+    connectionDB = sqlite3.connect("Government")
+    cursor = connectionDB.cursor()
+
+    cursor.execute("SELECT * FROM Citizen WHERE CitizenID = ?", (55555555555,))
+    citizen2 = cursor.fetchone()
+    cursor.close()
+    connectionDB.close()
+    matching_result = FingerPrintMatching.Check_Fingerprint(citizen[-2],citizen2[-2])
+    print(matching_result)
+    if matching_result:
+
         return render_template('voting_election_page.html',person=citizen,elections=elections)
-   # else:
-    #    return render_template('voting_id_page.html')
+    else:
+        return render_template('voting_id_page.html')
 
 
 @app.route("/candidates",methods=['POST', 'GET'])

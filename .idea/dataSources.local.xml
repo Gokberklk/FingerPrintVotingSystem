@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="dataSourceStorageLocal" created-in="PY-233.13135.95">
-    <data-source name="Government" uuid="e9329ec6-bc07-49ac-8fa2-479bdd31b1bf">
+    <data-source name="Government " uuid="37497fd6-0d75-426e-a6cd-ccf9180fda76">
       <database-info product="SQLite" version="3.43.0" jdbc-version="4.2" driver-name="SQLite JDBC" driver-version="3.43.0.0" dbms="SQLITE" exact-version="3.43.0" exact-driver-version="3.43">
         <identifier-quote-string>&quot;</identifier-quote-string>
       </database-info>
@@ -9,7 +9,7 @@
       <auth-provider>no-auth</auth-provider>
       <schema-mapping>
         <introspection-scope>
-          <node kind="schema" negative="1" />
+          <node kind="schema" qname="@" />
         </introspection-scope>
       </schema-mapping>
     </data-source>

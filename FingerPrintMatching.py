@@ -91,11 +91,15 @@ def Check_Fingerprint(image1, image2):
     # image2 = cv2.imread("Dataset/DB1_B/101_1.tif", 0)  # one will be taken from the device and the other from the database so arrange them
     image1_blob_file = io.BytesIO(image1)
     image2_blob_file = io.BytesIO(image2)  # create byteesIO object to work with binary data
-    Image1 = Image.open(image1_blob_file)
-    Image2 = Image.open(image2_blob_file)  # open image using Pillow
+    image_1 = Image.open(image1_blob_file)
+    image_2 = Image.open(image2_blob_file)  # open image using Pillow
+    image_1=image_1.convert('L')
+    image_2= image_2.convert('L')
+    image1array=np.array(image_1)
+    image2array=np.array(image_2)
 
-    Gabor_similarity, a, b = Gabor(image1, image2)
-    Minutiae_similarity, c, d = Minutiae(image1, image2)
+    Gabor_similarity, a, b = Gabor(image1array, image2array)
+    Minutiae_similarity, c, d = Minutiae(image1array, image2array)
     M_similarity_treshold = 0.70  # this value will change according to the tests of the dataset images and the images taken from the machine
     G_similarity_index_treshold = 0.95  # will be updated according to the data set the above values as well
     if Gabor_similarity > G_similarity_index_treshold and Minutiae_similarity > M_similarity_treshold:
