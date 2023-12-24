@@ -5,6 +5,8 @@ import FingerPrintMatching
 
 app = Flask(__name__)
 
+result_of_entered_ID = None
+fingerprint_machine = None
 
 @app.route("/", methods=['POST', 'GET'])
 def voting_id_page():  # Main page of voting screen

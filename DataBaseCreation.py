@@ -7,7 +7,7 @@ class createDatabase():
     def createDB(self):
         connectionDB = sqlite3.connect("Government")
         cursor = connectionDB.cursor()
-        cursor.execute("PRAGMA foreign_keys = 1")
+        cursor.execute("PRAGMA foreign_keys = ON")
 
         cursor.execute("CREATE TABLE IF NOT EXISTS CITIZEN("
                        "CitizenID INTEGER PRIMARY KEY,"
@@ -15,12 +15,15 @@ class createDatabase():
                        "Surname TEXT,"
                        "DOB DATE,"
                        "Adress TEXT,"
-                       "FingerPrint BLOP)")
+                       "FingerPrint BLOB,"
+                       "Photo BLOB)")
 
         cursor.execute("CREATE TABLE IF NOT EXISTS Election("
                        "ElectionID INTEGER PRIMARY KEY,"
                        "Result TEXT,"
-                       "DateOfElection DATE)")
+                       "DateOfElection DATE,"
+                       "ElectionTime TIME,"
+                       "Description TEXT)")
 
         cursor.execute("CREATE TABLE IF NOT EXISTS Vote("
                        "Isvoted BOOLEAN,"
