@@ -43,6 +43,9 @@ class InsertionRecord():
                    (33333333333, "Canberk", "Sefa", "1900-06-06", "Bursa", self.images[2]),
                    (44444444444, "Osman Eren", "Gündogdu", "1900-06-06", "Konya", self.images[3])]
         cursor.executemany("INSERT INTO Citizen VALUES(?, ?, ?, ?, ?, ?)", citizen)
+        election =[]
+
+
         i = 4
         for i in range(80):
             self.random_Citizen_Info()
