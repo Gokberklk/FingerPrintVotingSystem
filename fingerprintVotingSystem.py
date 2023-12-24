@@ -2,7 +2,7 @@ from flask import Flask, render_template, request
 import sqlite3
 citizen = None
 candidates = None #This variable holds the candidates to be displayed.
-elections=None #This variable holds the elections to be displayed.
+elections="Election 1" #This variable holds the elections to be displayed.
 Machine_ID=None
 # import DataBaseOperation
 import FingerPrintMatching
@@ -45,7 +45,9 @@ def voting_vote_page():
 
 @app.route("/candidates",methods=['POST', 'GET'])
 def voting_candidate_page():
-    pass
+    election_id = request.form.get('election_id')
+    return render_template("voting_candidate_page.html", election_id=election_id)
+
 
 
 if __name__ == '__main__':

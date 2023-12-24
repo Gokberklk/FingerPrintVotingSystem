@@ -1,21 +1,12 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Candidates</title>
-</head>
-<body>
-    <table class="table table-bordered">
-        <tr>
-            <th>Name</th>
-            <th>Surname</th>
-        </tr>
-        {{% for candidate in candidates %}}
-            <td>{{candidate[]}}</td>
-            <td>{{candidate[]}}</td>
-            <td>{{candidate[]}}</td> <!--Image will be displayed here-->
-        {{% %}}
-    </table>
+{% extends "layout.html" %}
+{% block content %}
 
-</body>
-</html>
+    <table class="table table-bordered" style="background-color: white; width: 8%;margin-left: 50px;margin-top: 30px; border-radius: 20px;">
+        <tr>
+            <th align="center">Candidate</th>
+        </tr>
+            <td align="middle"><img src="https://i.mydramalist.com/Bdp6D7_5c.jpg" height="100" width="80"><br><br><p style="font-weight: bolder">Zhao Lusi</p><input type="radio" id="radio"></td> <!--Image will be displayed here-->
+
+    </table>
+    <button class="btn btn-success" style="float: right;margin-right: 300px; width: 25%;height: 10%;font-size: larger">Complete Voting</button>
+{% endblock %}
