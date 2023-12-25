@@ -22,16 +22,18 @@
             <th>Date</th>
             <th>Time</th>
         </tr>
+        {% for election in elections %}
             <tr>
-                <td>{{elections}}</td>
-                <td>{{elections}}</td>
-                <td>{{elections}}</td>
+                <td>{{election[4]}}</td>
+                <td>{{election[2]}}</td>
+                <td>{{election[3]}}</td>
                 <td>
-                    <form action="{{ url_for('voting_candidate_page')}}">
-                        <button class="btn btn-primary" name="election_id">Vote</button>
+                    <form method="post" action="{{ url_for('voting_candidate_page')}}">
+                        <button class="btn btn-primary" name=string({{election[0]}})>Vote</button>
                     </form>
                 </td>
             </tr>
+        {% endfor %}
     </table>
 </div>
 

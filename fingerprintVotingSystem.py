@@ -2,7 +2,7 @@ from flask import Flask, render_template, request
 import sqlite3
 citizen = None
 candidates = None #This variable holds the candidates to be displayed.
-elections="Election 1" #This variable holds the elections to be displayed.
+elections=None #This variable holds the elections to be displayed.
 Machine_ID=None
 # import DataBaseOperation
 import FingerPrintMatching
@@ -40,6 +40,15 @@ def voting_vote_page():
     # for the demo we can send two images from the database to check the functionality of the function
     #matching_result = FingerPrintMatching.Check_Fingerprint()
     #if matching_result:
+        connection = sqlite3.connect("Government")
+        cursor = connection.cursor()
+        cursor.execute("SELECT * FROM Election")
+        global elections
+
+        elections = cursor.fetchall()
+        cursor.close()
+        connection.close()
+        print(elections)
         return render_template('voting_election_page.html',person=citizen,elections=elections)
    # else:
     #    return render_template('voting_id_page.html')
@@ -47,8 +56,15 @@ def voting_vote_page():
 
 @app.route("/candidates",methods=['POST', 'GET'])
 def voting_candidate_page():
+    connection = sqlite3.connect("Government")
+    cursor = connection.cursor()
     election_id = request.form.get('election_id')
-    return render_template("voting_candidate_page.html", election_id=election_id)
+    cursor.execute("SELECT * FROM CandidateElection WHERE ElectionID = :election_id", {'election_id': int(election_id)})
+    global candidates
+    candidates = cursor.fetchall()
+    cursor.close()
+    connection.close()
+    return render_template("voting_candidate_page.html", candidates=candidates)
 
 
 
