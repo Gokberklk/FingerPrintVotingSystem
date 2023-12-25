@@ -60,7 +60,7 @@ def Gabor(image1, image2):
     ktype = cv2.CV_32F
     image1 = cv2.resize(image1, (image2.shape[1], image2.shape[0]))
     # gabor filter parameters shall be arranged through testing
-    # example values will be given
+    # for the current dataset this values are appropriate
     ksize = 15
     sigma = 4
     theta = 90
