@@ -54,11 +54,13 @@ def voting_fingerprint_page():  # Fingerprint identification screen
 def voting_vote_page():
     #     the input values should be the Entered ID's fingerprint and machine fingerprint
     #    for the demo we can send two images from the database to check the functionality of the function
+    global elections
     connectionDB = sqlite3.connect("Government")
     cursor = connectionDB.cursor()
-
     cursor.execute("SELECT * FROM Citizen WHERE CitizenID = ?", (55555555555,))
     citizen2 = cursor.fetchone()
+    cursor.execute("SELECT * FROM Election")
+    elections = cursor.fetchall()
     cursor.close()
     connectionDB.close()
     matching_result = FingerPrintMatching.Check_Fingerprint(citizen[-2],citizen2[-2])
