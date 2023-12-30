@@ -1,13 +1,14 @@
 {% extends "layout.html" %}
 {% block content %}
 
-    <table class="table table-bordered" style="background-color: white; width: 8%;margin-left: 50px;margin-top: 30px; border-radius: 20px;">
-        {{% for candidate in candidates %}}
-        <tr>
-            <th align="center">Candidate</th>
-        </tr>
-            <td align="middle"><img src="https://i.mydramalist.com/Bdp6D7_5c.jpg" height="100" width="80"><br><br><p style="font-weight: bolder">{{candidate}}</p><input type="radio" id="radio"></td> <!--Image will be displayed here-->
-        {{% endfor %}}
+    <table class="table table-bordered" style="background-color: white; width: 8%;margin-left: 50px;margin-top: 30px;">
+
+        {% for candidate in candidates %}
+            <td align="middle" style="font-weight: bolder">Candidate<img src="data:image/png;base64,{{ image[candidates.index(candidate)] }}" height="100" width="80"><br><br><p>{{candidate[1]+"\n"+candidate[2]}}</p><input type="radio" id="radio"></td> <!--Image will be displayed here-->
+        {% endfor %}
     </table>
     <button class="btn btn-success" style="float: right;margin-right: 300px; width: 25%;height: 10%;font-size: larger">Complete Voting</button>
 {% endblock %}
+
+
+<img src="data:image/png;base64,{{ voter_fingerprint }}" />

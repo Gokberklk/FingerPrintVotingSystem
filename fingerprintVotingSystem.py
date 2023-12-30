@@ -8,6 +8,7 @@ import numpy as np
 from PIL import Image
 import io
 import cv2
+import matplotlib.pyplot as plt
 
 citizen = None
 candidates = None #This variable holds the candidates to be displayed.
@@ -55,6 +56,7 @@ def voting_vote_page():
     #     the input values should be the Entered ID's fingerprint and machine fingerprint
     #    for the demo we can send two images from the database to check the functionality of the function
     global elections
+    fingerprint = request.form.get('voter_fingerprint')
     connectionDB = sqlite3.connect("Government")
     cursor = connectionDB.cursor()
     cursor.execute("SELECT * FROM Citizen WHERE CitizenID = ?", (55555555555,))
@@ -63,8 +65,43 @@ def voting_vote_page():
     elections = cursor.fetchall()
     cursor.close()
     connectionDB.close()
-    matching_result = FingerPrintMatching.Check_Fingerprint(citizen[-2],citizen2[-2])
-    print(matching_result)
+    citizen3 = []
+    citizen3.append(base64.b64encode(citizen2[-2]).decode('utf-8'))
+    """
+    file = open("test", "w")
+    file.write(citizen3[0])
+    file.close()
+    file2 = open("test//test.jpg", "r")
+    fingerprint = file2.read("test//test.jpg")"""
+
+
+    # Open an image file (replace 'existing_image.png' with your image filename)
+    #image = Image.open('test//test.png')
+    """
+    # Save the image to a new file (e.g., 'saved_image.png')
+    image.save('saved_image.png')
+
+    # Read the saved image from the file
+    saved_image = Image.open('saved_image.png')
+
+    # Display the saved image
+    saved_image.show()
+    
+    """
+    # Convert the retrieved binary image data to a PIL Image object
+    image = Image.open(io.BytesIO(citizen2[-2]))
+
+    # Save the image to a file
+    image_file_path = 'saved_image.bmp'
+    image.save(image_file_path)
+
+    # Read the saved image from the file
+    #fingerprint = cv2.imread(image_file_path)
+    #print(fingerprint)
+    fingerprint = cv2.imread("Dataset/DB1_B/101_3.tif", 0)
+    fingerprint = cv2.imread("C:/Users/Eray/Documents/GitHub/FingerPrintVotingSystem/Real/1__M_Left_index_finger.bmp",0)
+    matching_result = FingerPrintMatching.Check_Fingerprint(citizen[-2], fingerprint)
+    #matching_result = True
     if matching_result:
 
         return render_template('voting_election_page.html',person=citizen,elections=elections)
@@ -75,7 +112,24 @@ def voting_vote_page():
 @app.route("/candidates",methods=['POST', 'GET'])
 def voting_candidate_page():
     election_id = request.form.get('election_id')
-    return render_template("voting_candidate_page.html", election_id=election_id)
+
+    connectionDB = sqlite3.connect("Government")
+    cursor = connectionDB.cursor()
+    cursor.execute("SELECT * FROM CandidateElection WHERE ElectionID = ?", (election_id,))
+    candidatesElections = cursor.fetchall()
+    candidates = []
+    image_base64 = []
+    for i in range(len(candidatesElections)):
+        cursor.execute("SELECT * FROM Citizen WHERE CitizenID = ?", (candidatesElections[i][1],))
+        temp_candidates = cursor.fetchone()
+        candidates.append(temp_candidates)
+
+        image_base64.append(base64.b64encode(candidates[i][-1]).decode('utf-8'))
+
+    cursor.close()
+    connectionDB.close()
+
+    return render_template("voting_candidate_page.html", candidates=candidates, image=image_base64)
 
 
 

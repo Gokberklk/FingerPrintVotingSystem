@@ -24,14 +24,15 @@
         </tr>
         {% for election in elections %}
             <tr>
+                <form method="post" action="{{ url_for('voting_candidate_page')}}">
                 <td>{{election[4]}}</td>
                 <td>{{election[2]}}</td>
                 <td>{{election[3]}}</td>
                 <td>
-                    <form method="post" action="{{ url_for('voting_candidate_page')}}">
-                        <button class="btn btn-primary" name=string({{election[0]}})>Vote</button>
-                    </form>
+                    <input type="hidden" name="election_id" value="{{election[0]}}">
+                    <input type="submit" value="Vote"/>
                 </td>
+                </form>
             </tr>
         {% endfor %}
     </table>
