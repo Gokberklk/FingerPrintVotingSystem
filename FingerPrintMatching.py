@@ -88,7 +88,7 @@ def Minutiae(image1, image2):
 
 def Check_Fingerprint(image1, image2):
     # image1 = cv2.imread("Dataset/DB1_B/101_3.tif", 0)  # the full path of the image if it is in the database change accordingly
-    # image2 = cv2.imread("Dataset/DB1_B/101_1.tif", 0)  # one will be taken from the device and the other from the database so arrange them
+    #image2 = cv2.imread("Dataset/DB1_B/101_1.tif", 0)  # one will be taken from the device and the other from the database so arrange them
     image1_blob_file = io.BytesIO(image1)
     image2_blob_file = io.BytesIO(image2)  # create byteesIO object to work with binary data
     image_1 = Image.open(image1_blob_file)
