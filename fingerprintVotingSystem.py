@@ -19,6 +19,7 @@ citizen = None
 candidates = None  # This variable holds the candidates to be displayed.
 elections = "Election 1"  # This variable holds the elections to be displayed.
 Machine_ID = None
+vote_num = 0
 
 app = Flask(__name__)
 
@@ -40,9 +41,12 @@ def voting_fingerprint_page():  # Fingerprint identification screen
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM Citizen WHERE CitizenID = :id", {'id': int(entered_id)})
     citizen = cursor.fetchone()
+    cursor.execute("SELECT * FROM Vote WHERE CitizenID = :id", {'id': int(entered_id)})
+    isvoted = cursor.fetchone()
+    print(isvoted[0])
     cursor.close()
     connection.close()
-    if citizen != None and int(entered_id) == citizen[0]:
+    if citizen != None and int(entered_id) == citizen[0] and isvoted[0] == 0:
         image1_blob_file = io.BytesIO(citizen[-2])
         image_1 = Image.open(image1_blob_file)
         image_1 = image_1.convert('L')
@@ -53,6 +57,8 @@ def voting_fingerprint_page():  # Fingerprint identification screen
                                       image1array)  # the fingerprint which is taken from the machine will be displayed for voter to see
         image_base64 = base64.b64encode(buffer).decode('utf-8')
         return render_template('voting_fingerprint_page.html', voter_fingerprint=image_base64)
+    elif isvoted[0] == True:
+        return render_template('voting_id_page.html', error="You have already voted!")
     else:
         return render_template('voting_id_page.html', error="Your ID does NOT exist!")
 
@@ -126,6 +132,21 @@ def voting_candidate_page():
 
     return render_template("voting_candidate_page.html", candidates=candidates, image=image_base64)
 
+
+@app.route("/complete", methods=['GET', 'POST'])
+def complete():
+    global vote_num
+    candidate_id = request.form.get('candidate_id')
+    connectionDB = sqlite3.connect("Government")
+    cursor = connectionDB.cursor()
+    cursor.execute("UPDATE CandidateElection SET CountOfVote = CountOfVote + 1 WHERE CitizenID = ?",(candidate_id,))
+    cursor.fetchone()
+    connectionDB.commit()
+    cursor.close()
+    connectionDB.close()
+    vote_num = vote_num + 1
+    print(vote_num)
+    return render_template("voting_election_page.html",  person=citizen, elections=elections)
 
 if __name__ == '__main__':
     app.run(debug=True)
