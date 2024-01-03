@@ -106,3 +106,23 @@ def Check_Fingerprint(image1, image2):
         return True
     else:
         return False
+
+def alternativeTesting():#Casia fingerprint dataset
+    dataset = []
+    train = []
+    root = "ml/DB1_B/"
+    for fp_owner in range(101,111):
+        for fp_sample in range(1,9):
+            destination = root+str(fp_owner)+'_'+str(fp_sample)+".tif"
+            image = cv2.imread(destination,0)
+            Gb_similarity,Gimfeature1,Gimfeature2 = Gabor(image,image)
+            #Mt_similarity,Mimfeature1,Mimfeature2 = Minutiae(image,image)
+            dataset.append(np.ravel(Gimfeature1,order='F')[0:300])# Dimentionality Reduction, Original = (300,300), now = (90000)
+            train.append(fp_owner-100)
+    train = np.array(train)
+    dataset = np.array(dataset)
+    #print()
+    #print(dataset[0])
+    #print(train)
+    #print(len(train),np.shape(dataset),np.shape(train))
+    return dataset,train

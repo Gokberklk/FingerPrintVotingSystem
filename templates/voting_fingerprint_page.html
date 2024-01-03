@@ -10,7 +10,7 @@
      <div class ='box-login' >
       <div class='fieldset-body' id='login_form'>
         <p class='field'>
-            <form action="{{ url_for('voting_vote_page')}}" method="post">
+            <form action="{{ url_for('voting_vote_page')}}" method="post" enctype="multipart/form-data">
                 <label style="margin-left: 10px" for='voter_fingerprint'>SCAN FINGERPRINT</label>
 <!--                changed the line below-->
                 <label style="margin-left: 10px" for="voter_fingerprint">Choose a fingerprint to upload:</label>

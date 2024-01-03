@@ -8,7 +8,12 @@ import numpy as np
 from PIL import Image
 import io
 import cv2
-import matplotlib.pyplot as plt
+
+from ml import Knn
+#from sklearn.metrics import accuracy_score
+#import matplotlib.pyplot as plt
+
+
 
 citizen = None
 candidates = None  # This variable holds the candidates to be displayed.
@@ -57,7 +62,7 @@ def voting_vote_page():
     #     the input values should be the Entered ID's fingerprint and machine fingerprint
     #    for the demo we can send two images from the database to check the functionality of the function
     global elections
-    fingerprint = request.form.get('voter_fingerprint')
+    fingerprint = request.files['voter_fingerprint']
     connectionDB = sqlite3.connect("Government")
     cursor = connectionDB.cursor()
     cursor.execute("SELECT * FROM Citizen WHERE CitizenID = ?", (55555555555,))
@@ -69,18 +74,31 @@ def voting_vote_page():
     # Convert the retrieved binary image data to a PIL Image object
     # Save the image to a file
     print(fingerprint)
-    with open(fingerprint, "rb") as image:
-        binary_data = image.read()
+    #with open(fingerprint, "rb") as image:
+    binary_data = fingerprint.read()
 
-    # with open('saved_image.bmp', 'wb') as file:
-    #     file.write(fingerprint)
+    #with open('saved_image.bmp', 'wb') as file:
+    #    file.write(citizen2[-2])
 
     # with open(fingerprint, "rb") as image:
     #     binary_data = image.read()
 
-    matching_result = FingerPrintMatching.Check_Fingerprint(citizen[-2], binary_data)
+    matching_result = FingerPrintMatching.Check_Fingerprint(citizen[-2], binary_data)#binary_data
+    #---MLAddition---
+    ml_dataset, ml_label = FingerPrintMatching.alternativeTesting()
+    ml_knn = Knn.KNN(ml_dataset, ml_label, "minkowski", 2, 2)
+    ml_destination = "ml/DB1_B/"
+    ml_filename = "101_1.tif"
+    ml_fileBelongsTo = 101       #int(ml_filename[0:3])-100
+    ml_image1 = cv2.imread(ml_destination+ml_filename,0)# Provided manually, could be selected by the client
+    ml_gb_similarity,ml_gb_imfeature1,ml_gb_imfeature2 = FingerPrintMatching.Gabor(ml_image1,ml_image1)
+    ml_test_instance = []
+    ml_test_instance.append(np.ravel(ml_gb_imfeature1,order="F")[0:300])
+    ml_predict = ml_knn.predict(ml_test_instance)
+    print("Filename belongs to:",ml_fileBelongsTo,"ml prediction:",int(ml_predict[0])+100)
+    ml_matchingResult = (int(ml_predict[0]) == ml_fileBelongsTo)
+    #---/MLAddition---
     if matching_result:
-
         return render_template('voting_election_page.html', person=citizen, elections=elections)
     else:
         return render_template('voting_id_page.html')
