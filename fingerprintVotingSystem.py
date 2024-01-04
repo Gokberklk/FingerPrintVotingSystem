@@ -2,9 +2,6 @@ import base64
 
 from flask import *
 import sqlite3
-
-from sklearn.neighbors import KNeighborsClassifier
-
 # import DataBaseOperation
 import FingerPrintMatching
 import numpy as np
@@ -95,23 +92,19 @@ def voting_vote_page():
     matching_result = FingerPrintMatching.Check_Fingerprint(citizen[-2], binary_data)#binary_data
     #---MLAddition---
     ml_dataset, ml_label = FingerPrintMatching.alternativeTesting()
-    ml_knn = KNeighborsClassifier(n_neighbors=2,weights="distance",metric="minkowski",p=2)
-    ml_knn.fit(ml_dataset,ml_label)
-    ml_mapping ={11111111111:101,22222222222:102,33333333333:103,44444444444:104,55555555555:105}
+    ml_knn = Knn.KNN(ml_dataset, ml_label, "minkowski", 2, 2)
     ml_destination = "ml/DB1_B/"
-    ml_filename = "110_8.tif"
-    ml_fileBelongsTo = ml_mapping[citizen[0]]       #int(ml_filename[0:3])-100
+    ml_filename = "101_1.tif"
+    ml_fileBelongsTo = 101       #int(ml_filename[0:3])-100
     ml_image1 = cv2.imread(ml_destination+ml_filename,0)# Provided manually, could be selected by the client
-    ml_gb_similarity,ml_gb_imfeature1,ml_gb_imfeature2 = FingerPrintMatching.Gabor(FingerPrintMatching.getGaborFromBinary(binary_data),ml_image1)
+    ml_gb_similarity,ml_gb_imfeature1,ml_gb_imfeature2 = FingerPrintMatching.Gabor(ml_image1,ml_image1)
     ml_test_instance = []
     ml_test_instance.append(np.ravel(ml_gb_imfeature1,order="F")[0:300])
     ml_predict = ml_knn.predict(ml_test_instance)
-    print("Expected to belong to:",ml_fileBelongsTo," - Citizen:"+str(citizen[0]) + " ||| ","ML-Prediction:",int(ml_predict[0])+100)
-    print(ml_knn.predict_proba(ml_test_instance))
-    ml_matchingResult = (int(ml_predict[0])+100 == ml_fileBelongsTo)
-    print(ml_matchingResult)
+    print("Filename belongs to:",ml_fileBelongsTo,"ml prediction:",int(ml_predict[0])+100)
+    ml_matchingResult = (int(ml_predict[0]) == ml_fileBelongsTo)
     #---/MLAddition---
-    if matching_result: #or ml_matchingResult:
+    if matching_result:
         return render_template('voting_election_page.html', person=citizen, elections=elections)
     else:
         return render_template('voting_id_page.html')

@@ -80,9 +80,6 @@ def Gabor(image1, image2):
 def Minutiae(image1, image2):
     minutiae_image_1 = extract_minutiae_Points(image1)
     minutiae_image_2 = extract_minutiae_Points(image2)
-    #print(minutiae_image_1,minutiae_image_2)
-    minutiae_image_1 = [0] if minutiae_image_1 == None else minutiae_image_1
-    minutiae_image_2 = [0] if minutiae_image_2 == None else minutiae_image_2
     similarity = len(set(minutiae_image_1) & set(minutiae_image_2)) / len(set(minutiae_image_1) | set(minutiae_image_2))
     # the line above basically calculates the similarity between two sets of points
     # the formula is found from minutiae algorithm
@@ -129,11 +126,3 @@ def alternativeTesting():#Casia fingerprint dataset
     #print(train)
     #print(len(train),np.shape(dataset),np.shape(train))
     return dataset,train
-def getGaborFromBinary(image1):
-    image1_blob_file = io.BytesIO(image1)
-    image_1 = Image.open(image1_blob_file)
-    image_1 = image_1.convert('L')
-    image1array = np.array(image_1)
-
-    Gabor_similarity, gbimage1, gbimage2 = Gabor(image1array, image1array)
-    return gbimage1
