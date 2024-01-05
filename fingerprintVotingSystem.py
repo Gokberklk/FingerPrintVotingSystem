@@ -43,7 +43,7 @@ def voting_fingerprint_page():  # Fingerprint identification screen
     citizen = cursor.fetchone()
     cursor.execute("SELECT * FROM Vote WHERE CitizenID = :id", {'id': int(entered_id)})
     isvoted = cursor.fetchone()
-    print(isvoted[0])
+    #print(isvoted[0])
     cursor.close()
     connection.close()
     if citizen != None and int(entered_id) == citizen[0] and isvoted[0] == 0:
@@ -57,8 +57,8 @@ def voting_fingerprint_page():  # Fingerprint identification screen
                                       image1array)  # the fingerprint which is taken from the machine will be displayed for voter to see
         image_base64 = base64.b64encode(buffer).decode('utf-8')
         return render_template('voting_fingerprint_page.html', voter_fingerprint=image_base64)
-    elif isvoted[0] == True:
-        return render_template('voting_id_page.html', error="You have already voted!")
+    #elif isvoted[0] == True:
+    #   return render_template('voting_id_page.html', error="You have already voted!")
     else:
         return render_template('voting_id_page.html', error="Your ID does NOT exist!")
 
@@ -79,7 +79,7 @@ def voting_vote_page():
     connectionDB.close()
     # Convert the retrieved binary image data to a PIL Image object
     # Save the image to a file
-    print(fingerprint)
+    #print(fingerprint)
     #with open(fingerprint, "rb") as image:
     binary_data = fingerprint.read()
 
@@ -145,7 +145,7 @@ def complete():
     cursor.close()
     connectionDB.close()
     vote_num = vote_num + 1
-    print(vote_num)
+    #print(vote_num)
     return render_template("voting_election_page.html",  person=citizen, elections=elections)
 
 if __name__ == '__main__':
