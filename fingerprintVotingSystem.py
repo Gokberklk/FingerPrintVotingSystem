@@ -29,6 +29,7 @@ fingerprint_machine = None
 
 @app.route("/", methods=['POST', 'GET'])
 def voting_id_page():  # Main page of voting screen
+
     return render_template('voting_id_page.html')
 
 
@@ -147,6 +148,51 @@ def complete():
     vote_num = vote_num + 1
     #print(vote_num)
     return render_template("voting_election_page.html",  person=citizen, elections=elections)
+
+@app.route("/results", methods=['GET', 'POST'])
+def election_results():
+
+     #We connect database and pull elections from it to be displayed in results page.
+    connectionDB = sqlite3.connect("Government")
+    cursor = connectionDB.cursor()
+    cursor.execute("SELECT * FROM Election")
+    electionList = cursor.fetchall()
+    cursor.close()
+    connectionDB.close()
+
+    #We have 2 forms in results page. First one is for selecting an election to see results of it,
+    #and the second one displays the results of the selected election.
+
+    form = 1
+
+    return render_template("election_results.html",elections=electionList, form=1)
+    #else:
+     #   return render_template("election_results.html", error="No elections being held!", form=1)
+
+@app.route("/calculate", methods=['GET', 'POST'])
+def calculate():
+    election_id = request.form.get('election_id')#We get election id to display votes of its candidates.
+
+
+    #We access the database and pull candidates of selected elections, their counts and pictures.
+    connectionDB = sqlite3.connect("Government")
+    cursor = connectionDB.cursor()
+    cursor.execute("SELECT * FROM CandidateElection WHERE ElectionID = ?", (election_id,))
+    candidatesElections = cursor.fetchall()
+    candidates = []
+    image_base64 = []
+    for i in range(len(candidatesElections)):
+        cursor.execute("SELECT * FROM Citizen WHERE CitizenID = ?", (candidatesElections[i][1],))
+        temp_candidates = cursor.fetchone()
+        candidates.append(temp_candidates)
+
+        image_base64.append(base64.b64encode(candidates[i][-1]).decode('utf-8'))
+    cursor.close()
+    connectionDB.close()
+
+
+    return render_template("election_results.html", candidates=candidates, candidateElections=candidatesElections, form=2, image=image_base64)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
