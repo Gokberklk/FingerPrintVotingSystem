@@ -190,8 +190,25 @@ def calculate():
     cursor.close()
     connectionDB.close()
 
+    percentages = CalculatePercentages(candidatesElections)
 
-    return render_template("election_results.html", candidates=candidates, candidateElections=candidatesElections, form=2, image=image_base64)
+    print(percentages)
+
+    return render_template("election_results.html", candidates=candidates, candidateElections=candidatesElections, form=2, image=image_base64, percentages=percentages)
+
+
+def CalculatePercentages(candidateElections):
+
+    #We calculate count percentages of each candidates and return percentages array.
+    percentages = []
+    total=0
+    for candidate in candidateElections:
+        total+=candidate[0]
+
+    for candidate in candidateElections:
+        percentages.append(candidate[0]/total * 100)
+
+    return percentages
 
 
 if __name__ == '__main__':
