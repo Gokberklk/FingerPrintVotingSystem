@@ -26,5 +26,22 @@
     </div>
 
  </div>
+<script src="{{url_for('static',filename='simple-web-serial.min.js')}}"></script>
+<script>
+console.log('ANANI SİKERİM');
+console.log('ANANI SİKERİM');
+//
+    //import { setupSerialConnection } from 'simple-web-serial';
 
+// Set up the serial connection
+const connection = SimpleWebSerial.setupSerialConnection({ requestAccessOnPageLoad: true });
+
+// React to incoming events
+connection.on('event-from-arduino', function(data) {
+    console.log('Received event "event-from-arduino" with parameter ' + data)
+});
+
+// Send named events to the Arduino with a number, string, array or json object
+connection.send('event-to-arduino', "Hello there, Arduino");
+</script>
 {% endblock %}
