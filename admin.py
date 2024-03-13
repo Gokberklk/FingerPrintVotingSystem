@@ -48,10 +48,35 @@ def RemoveElection():#This function deletes the selected election from the datab
     return render_template("elections.html",elections=elections)
 
 
+@app.route("/elections/add", methods=['POST','GET']) #
+def AddElection():#If the request is POST, this
+    # function retrieves election data from admin and add the election to the database. Otherwise
+    # it shows add election page to the admin.
+
+    if request.method == 'GET': #Election adding page is shown.
+        return render_template("addElection.html")
+
+    else: #Retrieve information of the election and add it to the database.
+        description = request.form.get('description')
+        date = request.form.get('date')
+        time = request.form.get('time')
+
+
+        #Adding the election to the database after checking validity of the data retrieved.
+        connectionDB = sqlite3.connect("Government")
+        cursor = connectionDB.cursor()
+        cursor.execute("INSERT INTO Election (Result,DateOfElection,ElectionTime,Description) VALUES(?, ?, ?, ?)", ("0",date,time,description))
+        connectionDB.commit()
+        cursor.close()
+        connectionDB.close()
+
+        return redirect(url_for('Elections'))
+
+
 
 @app.route("/candidates", methods=['GET'])
 def Candidates():#This function is used to call the page in which the admin see candidates.
-    return render_template("candidates.html")
+    return render_template('/elections')
 
 if __name__ == '__main__':
     app.run(debug=True)

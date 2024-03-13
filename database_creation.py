@@ -37,7 +37,7 @@ class createDatabase:
                            "Photo BLOB)")
 
             cursor.execute("CREATE TABLE IF NOT EXISTS Election("
-                           "ElectionID INTEGER PRIMARY KEY,"
+                           "ElectionID INTEGER PRIMARY KEY AUTOINCREMENT,"
                            "Result TEXT,"
                            "DateOfElection DATE,"
                            "ElectionTime TIME,"

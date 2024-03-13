@@ -25,19 +25,21 @@
           <td>{{election[3]}}</td>
           <td>{{election[4]}}</td>
           <td>
-
             <button class="btn btn-primary">Update</button>
 
              <form method="post" action="{{ url_for('RemoveElection')}}">
             <input type="hidden" name="ElectionID" id="ElectionID" value="{{election[0]}}">
             <button class="btn btn-danger">Remove</button>
-               <form>
+               </form>
           </td>
-
         </tr>
       {% endfor %}
     </tbody>
   </table>
+
+  <a href="{{ url_for('AddElection')}}">
+<button style="margin-left: 30px" class="btn btn-primary">Add Election</button>
+</a>
 
 </body>
 </html>
