@@ -72,7 +72,41 @@ def AddElection():#If the request is POST, this
 
         return redirect(url_for('Elections'))
 
+@app.route("/elections/update", methods=['POST','GET'])
+def UpdateElection():
 
+    condition = request.args.get('value')
+
+    if request.method == 'POST' and condition == None:
+
+        electionID = request.form.get('ElectionID')
+        connectionDB = sqlite3.connect("Government")
+        cursor = connectionDB.cursor()
+        cursor.execute("SELECT * FROM Election WHERE electionID = ?", (electionID,))
+        updated = cursor.fetchone()
+        description = updated[4]
+        date = updated[2]
+        time = updated[3]
+
+        cursor.close()
+        connectionDB.close()
+
+        return render_template("updateElection.html",description=description,date=date,time=time,electionID=electionID)
+
+    else:
+        description = request.form.get('description')
+        date = request.form.get('date')
+        time = request.form.get('time')
+        electionID = request.form.get('electionID')
+
+        connectionDB = sqlite3.connect("Government")
+        cursor = connectionDB.cursor()
+        cursor.execute("UPDATE Election SET Description = ?, DateOfElection = ?, ElectionTime = ? WHERE ElectionID = ?", (description, date, time, electionID))
+        connectionDB.commit()
+        cursor.close()
+        connectionDB.close()
+
+        return redirect(url_for('Elections'))
 
 @app.route("/candidates", methods=['GET'])
 def Candidates():#This function is used to call the page in which the admin see candidates.

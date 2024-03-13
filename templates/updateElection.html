@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fingerprint Voting System</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+</head>
+<body>
+
+<form method="post" action="{{ url_for('UpdateElection', value=1)}}">
+<!--    Description of the election-->
+    <div style="margin-left: 20px">
+        <br>
+        <label for="tarea">Description</label>
+        <textarea class="form-control" id="tarea" rows="5" style="width: 600px" name="description">{{description}}</textarea>
+    </div>
+<br>
+<!--Date of the election-->
+<div style="margin-left: 20px">
+    <label for="date">Date</label>
+    <br>
+    <input type="date" id="date" name="date" value={{date}}>
+</div>
+<br>
+<!--Time of the election-->
+<div style="margin-left: 20px">
+    <label for="time">Time</label>
+    <br>
+    <input type="time" id="time" name="time" value={{time}}>
+</div>
+<br>
+<br>
+<br>
+<button style="margin-left: 20px;width: 200px" class="btn btn-success">Update Election</button>
+    <input type="hidden" name="electionID" value={{electionID}}>
+    </form>
+<br>
+<br>
+<div style="margin-left: 20px">
+<a href="{{ url_for('Elections')}}"><button style="width: 200px" class="btn btn-danger">Cancel</button></a>
+</div>
+
+
+</body>
+</html>

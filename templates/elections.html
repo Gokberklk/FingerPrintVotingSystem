@@ -3,17 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <title>Fingerprint Voting System</title>
-  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
-  <table style="margin-left: 100px; margin-top: 20px" class="table table-bordered">
-    <thead>
+  <table style="margin-top: 20px" class="table table-hover">
+    <thead class="thead-dark">
       <tr>
         <th>Election ID</th>
         <th>Result</th>
         <th>Date</th>
         <th>Time</th>
         <th>Description</th>
+        <th></th>
+        <th></th>
       </tr>
     </thead>
     <tbody>
@@ -25,12 +27,18 @@
           <td>{{election[3]}}</td>
           <td>{{election[4]}}</td>
           <td>
-            <button class="btn btn-primary">Update</button>
+            <div style="display:flex; gap: 50px" class="button-container">
+              <form method="post" action="{{ url_for('UpdateElection')}}">
+                <input type="hidden" name="ElectionID" id="ElectionID" value="{{election[0]}}">
+              <button style="width: 150px" class="btn btn-primary">Update</button>
+                </form>
 
              <form method="post" action="{{ url_for('RemoveElection')}}">
             <input type="hidden" name="ElectionID" id="ElectionID" value="{{election[0]}}">
-            <button class="btn btn-danger">Remove</button>
+            <button style="width: 150px" class="btn btn-danger">Remove</button>
                </form>
+            </div>
+
           </td>
         </tr>
       {% endfor %}
@@ -38,7 +46,11 @@
   </table>
 
   <a href="{{ url_for('AddElection')}}">
-<button style="margin-left: 30px" class="btn btn-primary">Add Election</button>
+<button style="margin-left: 30px" class="btn btn-success">Add Election</button>
+</a>
+
+<a href="{{ url_for('AdminMainPage')}}">
+<button style="margin-left: 30px" class="btn btn-secondary">Main Page</button>
 </a>
 
 </body>
