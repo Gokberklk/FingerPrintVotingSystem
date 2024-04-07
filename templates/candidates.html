@@ -3,9 +3,55 @@
 <head>
   <meta charset="UTF-8">
   <title>Fingerprint Voting System</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
+  <table style="margin-top: 20px" class="table table-hover">
+    <thead class="thead-dark">
+      <tr>
+        <th>Election ID</th>
+        <th>Result</th>
+        <th>Start Date</th>
+        <th>Start Time</th>
+        <th>Description</th>
+        <th>End Date</th>
+        <th>End Time</th>
+        <th></th>
+        <th></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for election in elections %}
+        <tr>
+          <td>{{election[0]}}</td>
+          <td>{{election[1]}}</td>
+          <td>{{election[2]}}</td>
+          <td>{{election[3]}}</td>
+          <td>{{election[4]}}</td>
+          <td>{{election[5]}}</td>
+          <td>{{election[6]}}</td>
+          <td>
+            <div style="display:flex; gap: 50px" class="button-container">
+                <form method="post" action="{{ url_for('AddCandidate',value=0)}}">
+                <input type="hidden" name="ElectionID" id="ElectionID" value="{{election[0]}}">
+              <button style="width: 150px" class="btn btn-primary">Add Candidate</button>
+                </form>
 
+                <form method="post" action="{{ url_for('RemoveCandidate',value=0)}}">
+                <input type="hidden" name="ElectionID" id="ElectionID" value="{{election[0]}}">
+              <button style="width: 160px" class="btn btn-danger">Remove Candidate</button>
+                </form>
+            </div>
+
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+
+<a href="{{ url_for('AdminMainPage')}}">
+<button style="margin-left: 30px" class="btn btn-secondary">Main Page</button>
+</a>
 
 </body>
 </html>

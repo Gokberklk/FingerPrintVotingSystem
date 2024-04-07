@@ -3,10 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <title>Fingerprint Voting System</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
-<body>
-    <h2><a href="/elections">Elections</a></h2>
-    <h2><a href="/candidates">Candidates</a></h2>
-
+<body style="background-color: #303030">
+<div style="margin-left: 1450px; margin-top: 10px">
+     <form method="get" action="{{ url_for('LogOut')}}">
+         <a href="/logout" > <p>Log Out</p></a></form>
+</div>
+<div style="margin-left: 350px;margin-top: 120px">
+<h2 style="color: #03a9f4" class="display-4">Choose an operation to perform</h2>
+    </div>
+<div style="margin-left: 610px;margin-top: 80px">
+    <h2><a href="/elections"><button style="width: 250px;height: 50px" class="btn btn-primary">Elections</button></a></h2>
+    <br>
+    <h2><a href="/candidates"><button style="width: 250px;height: 50px" class="btn btn-primary">Candidates</button></a></h2>
+</div>
 </body>
 </html>

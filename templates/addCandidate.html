@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fingerprint Voting System</title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+<form method="post" action="{{ url_for('AddCandidate',value=1)}}">
+<div style="margin-top: 150px;margin-left: 500px">
+<label for="id">Candidate ID</label>
+<input class="form-control" style="width: 400px;" type="text" id="candidateID" name="candidateID">
+  <input type="hidden" name = "electionID" value= {{electionID}}>
+  <br>
+  <br>
+  <button style="width: 200px" class="btn btn-success">Add Candidate</button>
+</form>
+<br>
+<br>
+<form method="get" action="{{ url_for('Candidates')}}">
+  <button style="width: 200px" class="btn btn-primary">Cancel</button>
+</form>
+  <br>
+  <br>
+{% if error%}
+  <h3 style="color: red">{{ error }}!</h3>
+{% endif %}
+</div>
+
+
+</body>
+</html>

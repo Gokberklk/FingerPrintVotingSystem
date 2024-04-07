@@ -41,7 +41,10 @@ class createDatabase:
                            "Result TEXT,"
                            "DateOfElection DATE,"
                            "ElectionTime TIME,"
-                           "Description TEXT)")
+                           "Description TEXT,"
+                           "EndDate DATE,"
+                           "EndTime TIME)")
+
 
             cursor.execute("CREATE TABLE IF NOT EXISTS Vote("
                            "Isvoted BOOLEAN,"
@@ -165,7 +168,7 @@ class InsertionRecord:
 
         # ------Election------
         cursor.executemany(
-            "INSERT INTO Election (ElectionID, Result, DateOfElection, ElectionTime) VALUES (?, ?, ?, ?)",
+            "INSERT INTO Election (ElectionID, Result, DateOfElection, ElectionTime, EndDate, EndTime) VALUES (?, ?, ?, ?,?,?)",
             const.election)
         Logger.log("Mock elections are inserted.")
 

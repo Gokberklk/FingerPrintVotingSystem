@@ -11,9 +11,11 @@
       <tr>
         <th>Election ID</th>
         <th>Result</th>
-        <th>Date</th>
-        <th>Time</th>
+        <th>Start Date</th>
+        <th>Start Time</th>
         <th>Description</th>
+        <th>End Date</th>
+        <th>End Time</th>
         <th></th>
         <th></th>
       </tr>
@@ -26,6 +28,8 @@
           <td>{{election[2]}}</td>
           <td>{{election[3]}}</td>
           <td>{{election[4]}}</td>
+          <td>{{election[5]}}</td>
+          <td>{{election[6]}}</td>
           <td>
             <div style="display:flex; gap: 50px" class="button-container">
               <form method="post" action="{{ url_for('UpdateElection')}}">

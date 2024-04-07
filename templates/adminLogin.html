@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html >
+<head>
+  <meta charset="UTF-8">
+  <title>Fingerprint Voting System</title>
+  <style>
+    .custom-heading{
+    margin-left: 30px;
+    margin-right: 20px;
+    color:white;
+    }
+
+  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/5.0.0/normalize.min.css">
+
+  <link rel='stylesheet prefetch' href='https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.2.3/animate.min.css'>
+
+      <link rel="stylesheet" type="text/css" href="static/styles.css">
+
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+
+
+</head>
+<body style="background: #303030" >
+
+<h1 class="custom-heading">FPVS Admin Login</h1>
+<h2 class="custom-heading">{{error}}</h2>
+<div class='box'>
+  <div class='box-form'>
+    <div style="background: #03a9f4" class='box-login-tab'></div>
+    <div class='box-login-title'>
+      <div class='i i-login'></div><h2>LOGIN</h2>
+    </div>
+    <div style="background-color: #03a9f4" class='box-login'>
+      <div class='fieldset-body' id='login_form'>
+        <form action="{{ url_for('Login')}}" method="post">
+          <p class='field'>
+          <label style="color: white" for='voter_id'>ADMIN ID</label>
+          <input style="background-color: white" type='text' id='admin_id' name='admin_id' title='Admin ID' maxlength="11" pattern="[0-9]*" />
+        </p>
+        <input style="background-color: white; color: black" type='submit' id='check_id' value='LOG IN' title='Check id and continue with fingerprint scan' />
+        </form>
+
+      </div>
+    </div>
+  </div>
+  </div>
+
+
+  <script src='http://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js'></script>
+<script src='http://cdnjs.cloudflare.com/ajax/libs/modernizr/2.8.3/modernizr.min.js'></script>
+
+    <script src="C:\Users\Eray\Desktop\Fingerprint Voting System\fingerprintVotingSystem\templates\css\index.js"></script>
+
+
+
+</body>
+</html>
+
+
+
+
+
+
+
