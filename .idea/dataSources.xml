@@ -2,7 +2,7 @@
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
     <data-source source="LOCAL" name="Government" uuid="f6e56af7-8947-4698-a8cf-852c24f6b0b4">
-      <driver-ref>sqlite.xerial</driver-ref>
+      <driver-ref>9d1a5b24-3102-4973-bec3-d5ea89e622c9</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
       <jdbc-url>jdbc:sqlite:C:\Users\canbe\OneDrive\Masaüstü\Github\FingerPrintVotingSystem\Government</jdbc-url>
