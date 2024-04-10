@@ -16,6 +16,8 @@ from ml import Knn
 
 
 citizen = None
+voterID = None
+numberOfElectionsActive = 2
 candidates = None  # This variable holds the candidates to be displayed.
 elections = "Election 1"  # This variable holds the elections to be displayed.
 Machine_ID = None
@@ -29,6 +31,10 @@ fingerprint_machine = None
 
 @app.route("/", methods=['POST', 'GET'])
 def voting_id_page():  # Main page of voting screen
+    connection = sqlite3.connect("Government")
+    cursor = connection.cursor()
+    cursor.execute("DELETE FROM Vote")
+    connection.commit()
 
     return render_template('voting_id_page.html')
 
@@ -44,26 +50,13 @@ def voting_fingerprint_page():  # Fingerprint identification screen
     citizen = cursor.fetchone()
     cursor.execute("SELECT * FROM Vote WHERE CitizenID = :id", {'id': int(entered_id)})
     isvoted = cursor.fetchall()
-    voted=[]
-    for row in isvoted:
-        if row[0] is False:
-           voted.append(0)
-        else:
-            voted.append(1)
-    count=0
-    for i in range(len(voted)):
-        if voted[i] == 0:
-            count=0
-            break
-        else:
-            count=1
-    if count == 1:
-        return render_template('voting_id_page.html', error="You have already voted!")
 
+    if len(isvoted) == numberOfElectionsActive:
+        return render_template('voting_id_page.html', error="You have already voted!")
 
     cursor.close()
     connection.close()
-    if citizen != None and int(entered_id) == citizen[0] and isvoted[0] == 0:
+    if citizen != None and int(entered_id) == citizen[0]:
         image1_blob_file = io.BytesIO(citizen[-2])
         image_1 = Image.open(image1_blob_file)
         image_1 = image_1.convert('L')
@@ -73,6 +66,8 @@ def voting_fingerprint_page():  # Fingerprint identification screen
         retval, buffer = cv2.imencode('.png',
                                       image1array)  # the fingerprint which is taken from the machine will be displayed for voter to see
         image_base64 = base64.b64encode(buffer).decode('utf-8')
+        global voterID
+        voterID = entered_id
         return render_template('voting_fingerprint_page.html', voter_fingerprint=image_base64)
     #elif isvoted[0] == True:
     #   return render_template('voting_id_page.html', error="You have already voted!")
@@ -147,7 +142,7 @@ def voting_candidate_page():
     cursor.close()
     connectionDB.close()
 
-    return render_template("voting_candidate_page.html", candidates=candidates, image=image_base64)
+    return render_template("voting_candidate_page.html", candidates=candidates, image=image_base64, election_id=election_id)
 
 
 @app.route("/complete", methods=['GET', 'POST'])
@@ -157,11 +152,15 @@ def complete():
     connectionDB = sqlite3.connect("Government")
     cursor = connectionDB.cursor()
     cursor.execute("UPDATE CandidateElection SET CountOfVote = CountOfVote + 1 WHERE CitizenID = ?",(candidate_id,))
-    cursor.fetchone()
+    vote_num = vote_num + 1
+    electionID = request.args.get('election_id')
+    print(electionID)
+    print(voterID)
+    cursor.execute("INSERT INTO Vote (IsVoted, CitizenID, ElectionID) VALUES (?,?,?)", (True,voterID,electionID))
+
     connectionDB.commit()
     cursor.close()
     connectionDB.close()
-    vote_num = vote_num + 1
     #print(vote_num)
     return render_template("voting_election_page.html",  person=citizen, elections=elections)
 

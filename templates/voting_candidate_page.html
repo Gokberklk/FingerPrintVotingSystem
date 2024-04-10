@@ -1,7 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
 
-    <form method="post" action="{{ url_for('complete')}}">
+    <form method="post" action="{{ url_for('complete',election_id=election_id)}}">
         <table class="table table-bordered" style="background-color: white; width: 8%;margin-left: 50px;margin-top: 30px;">
 
             {% for candidate in candidates %}
