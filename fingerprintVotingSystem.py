@@ -43,8 +43,24 @@ def voting_fingerprint_page():  # Fingerprint identification screen
     cursor.execute("SELECT * FROM Citizen WHERE CitizenID = :id", {'id': int(entered_id)})
     citizen = cursor.fetchone()
     cursor.execute("SELECT * FROM Vote WHERE CitizenID = :id", {'id': int(entered_id)})
-    isvoted = cursor.fetchone()
-    #print(isvoted[0])
+    isvoted = cursor.fetchall()
+    voted=[]
+    for row in isvoted:
+        if row[0] is False:
+           voted.append(0)
+        else:
+            voted.append(1)
+    count=0
+    for i in range(len(voted)):
+        if voted[i] == 0:
+            count=0
+            break
+        else:
+            count=1
+    if count == 1:
+        return render_template('voting_id_page.html', error="You have already voted!")
+
+
     cursor.close()
     connection.close()
     if citizen != None and int(entered_id) == citizen[0] and isvoted[0] == 0:
