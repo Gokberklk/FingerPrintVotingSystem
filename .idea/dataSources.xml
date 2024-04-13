@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="Government" uuid="2cb391ef-eaa1-4b35-9da8-0483b9eee72b">
+    <data-source source="LOCAL" name="Government" uuid="ca773bbc-343c-4f7a-b8f4-4912a65c8cd2">
       <driver-ref>sqlite.xerial</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
-      <jdbc-url>jdbc:sqlite:C:\Users\canbe\OneDrive\Masaüstü\Github\FingerPrintVotingSystem\Government</jdbc-url>
+      <jdbc-url>jdbc:sqlite:C:\Users\USER\Desktop\School\GraduationProject\FingerPrintVotingSystem\Government</jdbc-url>
       <working-dir>$ProjectFileDir$</working-dir>
       <libraries>
         <library>
