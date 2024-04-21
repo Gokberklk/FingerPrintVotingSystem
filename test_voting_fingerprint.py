@@ -17,7 +17,7 @@ def client():
 def test_voting_fingerprint_page_success(client):
     def mock_execute(query, params):
         if 'SELECT * FROM Citizen WHERE CitizenID' in query:
-            return [(55555555555, b'fingerprint_image_blob')]  # assume citizen exists
+            return [(55555555555, )]  # assume citizen exists
         elif 'SELECT * FROM Vote WHERE CitizenID' in query:
             return []  # assume citizen has not voted
         else:
