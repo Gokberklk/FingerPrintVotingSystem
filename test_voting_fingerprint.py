@@ -68,20 +68,15 @@ def test_voting_vote_page_success():
             with patch('fingerprintVotingSystem.FingerPrintMatching.Check_Fingerprint', return_value=True):
                 with patch('fingerprintVotingSystem.sqlite3.connect') as mock_connect:
                     # Mock database query results
-                    person_data = (55555555555, "John", "Doe", "1990-01-01")
-                    elections_data = [
-                        (20244, "Election 1", "2024-04-13", "10:00"),
-                        (20245, "Election 2", "2024-04-14", "12:00")
-                    ]
+                    person_data = (55555555555,)
                     mock_cursor = mock_connect.return_value.cursor.return_value
                     mock_cursor.fetchone.return_value = person_data
-                    mock_cursor.fetchall.return_value = elections_data
 
                     # Create a file-like object from the image data
-                    image_file = io.BytesIO(image_data)
+
 
                     # Send a POST request to the /vote endpoint with the file data
-                    response = client.post('/vote', data={'voter_fingerprint': (image_file, 'saved_image.bmp')})
+                    response = client.post('/vote', data={'voter_fingerprint': (image_data, 'saved_image.bmp')})
 
                     # Check if the response status code is 200 and if the expected template is in the response data
                     assert response.status_code == 200
