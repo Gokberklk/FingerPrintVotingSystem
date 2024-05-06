@@ -15,10 +15,10 @@ from ml import Knn
 
 
 
-citizen = None
-voterID = None
+citizen = None #Global variable to store the citizen who will vote
+voterID = None #Global variable to store the citizen ID of the voter
 numberOfElectionsActive = 2
-candidates = None  # This variable holds the candidates to be displayed.
+candidates = None  #Global variable to hold the candidates to be displayed
 elections = "Election 1"  # This variable holds the elections to be displayed.
 Machine_ID = None
 vote_num = 0
@@ -28,22 +28,34 @@ app = Flask(__name__)
 result_of_entered_ID = None
 fingerprint_machine = None
 
-
+'''That function directs the voter to citizen ID checking page for the 
+voting process.'''
 @app.route("/", methods=['POST', 'GET'])
 def voting_id_page():  # Main page of voting screen
-    connection = sqlite3.connect("Government")
-    cursor = connection.cursor()
-    cursor.execute("DELETE FROM Vote")
-    connection.commit()
 
+    # connection = sqlite3.connect("Government")
+    # cursor = connection.cursor()
+    # cursor.execute("DELETE FROM Vote")
+    # connection.commit()
     return render_template('voting_id_page.html')
 
 
+
+
+
+
+'''In that function, the program takes citizen ID number from the voter. If it is 
+exist in the database, it will direct the voter to the fingerprint checking page. Otherwise, it will
+redirect the voter back to citizen ID checking page. 
+ '''
 @app.route("/fingerprint", methods=['POST'])
 def voting_fingerprint_page():  # Fingerprint identification screen
     global citizen
     global Machine_ID
-    entered_id = request.form.get('voter_id')
+
+    '''Getting citizen ID from the request and getting citizen from the database whose citizen ID equals to
+    entered citizen ID.'''
+    entered_id = request.form.get('voter_id') #Getting
     connection = sqlite3.connect("Government")
     cursor = connection.cursor()
     cursor.execute("SELECT * FROM Citizen WHERE CitizenID = :id", {'id': int(entered_id)})
@@ -56,7 +68,9 @@ def voting_fingerprint_page():  # Fingerprint identification screen
 
     cursor.close()
     connection.close()
+
     if citizen != None and int(entered_id) == citizen[0]:
+        '''That part adjusts the fingerprint image displayed in the fingerprint checking page.'''
         image1_blob_file = io.BytesIO(citizen[-2])
         image_1 = Image.open(image1_blob_file)
         image_1 = image_1.convert('L')
@@ -75,12 +89,25 @@ def voting_fingerprint_page():  # Fingerprint identification screen
         return render_template('voting_id_page.html', error="Your ID does NOT exist!")
 
 
+
+
+
+
+
+
+'''This function gets the citizen fingerprint from the machine. If the fingerprint data has a match
+with related citizen, it directs user to the elections page to select an election to vote. If there is no match,
+it redirects the user back to citizen ID checking page of the voting process.'''
 @app.route("/vote", methods=['POST', 'GET'])
 def voting_vote_page():
+
     #     the input values should be the Entered ID's fingerprint and machine fingerprint
     #    for the demo we can send two images from the database to check the functionality of the function
     global elections
+
     fingerprint = request.files['voter_fingerprint']
+
+
     connectionDB = sqlite3.connect("Government")
     cursor = connectionDB.cursor()
     cursor.execute("SELECT * FROM Citizen WHERE CitizenID = ?", (55555555555,))
@@ -106,9 +133,18 @@ def voting_vote_page():
     if matching_result:
         return render_template('voting_election_page.html', person=citizen, elections=elections)
     else:
-        return render_template('voting_id_page.html')
+        return render_template('voting_id_page.html',error="Your fingerprint does NOT exist!")
 
 
+
+
+
+
+
+
+'''This function takes the ID of the election that the voter selected in elections page,
+it retrieves the candidates data from the database for the corresponding election and directs
+the voter to the candidates page to vote a candidate for that specific election.'''
 @app.route("/candidates", methods=['POST', 'GET'])
 def voting_candidate_page():
     election_id = request.form.get('election_id')
@@ -132,24 +168,35 @@ def voting_candidate_page():
     return render_template("voting_candidate_page.html", candidates=candidates, image=image_base64, election_id=election_id)
 
 
+
+
+
+
+
 @app.route("/complete", methods=['GET', 'POST'])
 def complete():
     global vote_num
+
     candidate_id = request.form.get('candidate_id')
     connectionDB = sqlite3.connect("Government")
     cursor = connectionDB.cursor()
+
     cursor.execute("UPDATE CandidateElection SET CountOfVote = CountOfVote + 1 WHERE CitizenID = ?",(candidate_id,))
     vote_num = vote_num + 1
     electionID = request.args.get('election_id')
-    print(electionID)
-    print(voterID)
     cursor.execute("INSERT INTO Vote (IsVoted, CitizenID, ElectionID) VALUES (?,?,?)", (True,voterID,electionID))
 
     connectionDB.commit()
     cursor.close()
     connectionDB.close()
-    #print(vote_num)
+
     return render_template("voting_election_page.html",  person=citizen, elections=elections)
+
+
+
+
+
+
 
 @app.route("/results", methods=['GET', 'POST'])
 def election_results():
@@ -170,6 +217,15 @@ def election_results():
     return render_template("election_results.html",elections=electionList, form=1)
     #else:
      #   return render_template("election_results.html", error="No elections being held!", form=1)
+
+
+
+
+
+
+
+
+
 
 @app.route("/calculate", methods=['GET', 'POST'])
 def calculate():
