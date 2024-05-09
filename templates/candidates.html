@@ -34,12 +34,12 @@
             <div style="display:flex; gap: 50px" class="button-container">
                 <form method="post" action="{{ url_for('AddCandidate',value=0)}}">
                 <input type="hidden" name="ElectionID" id="ElectionID" value="{{election[0]}}">
-              <button style="width: 150px" class="btn btn-primary">Add Candidate</button>
+              <button name="{{election[0]}}" style="width: 150px" class="btn btn-primary">Add Candidate</button>
                 </form>
 
                 <form method="post" action="{{ url_for('RemoveCandidate',value=0)}}">
                 <input type="hidden" name="ElectionID" id="ElectionID" value="{{election[0]}}">
-              <button style="width: 160px" class="btn btn-danger">Remove Candidate</button>
+              <button id="{{election[0]}}" style="width: 160px" class="btn btn-danger">Remove Candidate</button>
                 </form>
             </div>
 

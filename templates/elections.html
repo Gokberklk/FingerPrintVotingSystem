@@ -34,12 +34,12 @@
             <div style="display:flex; gap: 50px" class="button-container">
               <form method="post" action="{{ url_for('UpdateElection')}}">
                 <input type="hidden" name="ElectionID" id="ElectionID" value="{{election[0]}}">
-              <button style="width: 150px" class="btn btn-primary">Update</button>
+              <button name="{{election[0]}}" style="width: 150px" class="btn btn-primary">Update</button>
                 </form>
 
              <form method="post" action="{{ url_for('RemoveElection')}}">
             <input type="hidden" name="ElectionID" id="ElectionID" value="{{election[0]}}">
-            <button style="width: 150px" class="btn btn-danger">Remove</button>
+            <button id="{{election[0]}}" style="width: 150px" class="btn btn-danger">Remove</button>
                </form>
             </div>
 
@@ -50,7 +50,7 @@
   </table>
 
   <a href="{{ url_for('AddElection')}}">
-<button style="margin-left: 30px" class="btn btn-success">Add Election</button>
+<button id="add_election" style="margin-left: 30px" class="btn btn-success">Add Election</button>
 </a>
 
 <a href="{{ url_for('AdminMainPage')}}">

@@ -28,7 +28,7 @@
           <td>{{candidatesList[i][4]}}</td>
           <td><img src="data:image/png;base64,{{ Image[candidatesList.index(candidatesList[i])] }}" height="100" width="80"></td>
           <td><form method="post" action="{{url_for('RemoveCandidate',value=1)}}">
-            <button class="btn btn-danger">Remove</button>
+            <button id="{{candidatesList[i][0]}}"class="btn btn-danger">Remove</button>
             <input type="hidden" value={{candidatesList[i][0]}} name="candidateID">
             <input type="hidden" value={{electionID}} name="ElectionID">
           </form>
