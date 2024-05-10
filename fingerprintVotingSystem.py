@@ -8,7 +8,7 @@ import numpy as np
 from PIL import Image
 import io
 import cv2
-
+import functools
 from ml import Knn
 #from sklearn.metrics import accuracy_score
 #import matplotlib.pyplot as plt
@@ -16,17 +16,35 @@ from ml import Knn
 
 
 citizen = None
-voterID = None
 numberOfElectionsActive = 2
 candidates = None  # This variable holds the candidates to be displayed.
 elections = "Election 1"  # This variable holds the elections to be displayed.
 Machine_ID = None
-vote_num = 0
+
 
 app = Flask(__name__)
-
+app.secret_key="KawakiWoAmeku"
 result_of_entered_ID = None
 fingerprint_machine = None
+
+from functools import wraps
+from flask import session, redirect
+
+from functools import wraps
+from flask import session, redirect
+
+from functools import wraps
+from flask import session, redirect
+
+def check_authentication(view_func):
+    @wraps(view_func)
+    def wrapped_function(*args, **kwargs):
+        if 'voter' not in session:
+            return redirect('/')
+        return view_func(*args, **kwargs)
+    return wrapped_function
+
+
 
 
 @app.route("/", methods=['POST', 'GET'])
@@ -35,6 +53,7 @@ def voting_id_page():  # Main page of voting screen
     cursor = connection.cursor()
     cursor.execute("DELETE FROM Vote")
     connection.commit()
+    session.clear()
 
     return render_template('voting_id_page.html')
 
@@ -52,6 +71,7 @@ def voting_fingerprint_page():  # Fingerprint identification screen
     isvoted = cursor.fetchall()
 
     if len(isvoted) == numberOfElectionsActive:
+        session.pop('voter',None)
         return render_template('voting_id_page.html', error="You have already voted!")
 
     cursor.close()
@@ -66,8 +86,8 @@ def voting_fingerprint_page():  # Fingerprint identification screen
         retval, buffer = cv2.imencode('.png',
                                       image1array)  # the fingerprint which is taken from the machine will be displayed for voter to see
         image_base64 = base64.b64encode(buffer).decode('utf-8')
-        global voterID
-        voterID = entered_id
+        session['voter'] = entered_id
+        print(session['voter'])
         return render_template('voting_fingerprint_page.html', voter_fingerprint=image_base64)
     #elif isvoted[0] == True:
     #   return render_template('voting_id_page.html', error="You have already voted!")
@@ -76,11 +96,17 @@ def voting_fingerprint_page():  # Fingerprint identification screen
 
 
 @app.route("/vote", methods=['POST', 'GET'])
+@check_authentication
 def voting_vote_page():
     #     the input values should be the Entered ID's fingerprint and machine fingerprint
     #    for the demo we can send two images from the database to check the functionality of the function
     global elections
-    fingerprint = request.files['voter_fingerprint']
+    if 'voter' not in session:
+        return redirect('/')
+    if request.method == 'GET':
+        return redirect("/")
+    if request.method == 'POST':
+        fingerprint = request.files['voter_fingerprint']
     connectionDB = sqlite3.connect("Government")
     cursor = connectionDB.cursor()
     cursor.execute("SELECT * FROM Citizen WHERE CitizenID = ?", (55555555555,))
@@ -91,31 +117,33 @@ def voting_vote_page():
     connectionDB.close()
     # Convert the retrieved binary image data to a PIL Image object
     # Save the image to a file
-    #print(fingerprint)
-    #with open(fingerprint, "rb") as image:
+    # print(fingerprint)
+    # with open(fingerprint, "rb") as image:
     binary_data = fingerprint.read()
 
-    #with open('saved_image.bmp', 'wb') as file:
+    # with open('saved_image.bmp', 'wb') as file:
     #    file.write(citizen2[-2])
 
     # with open(fingerprint, "rb") as image:
     #     binary_data = image.read()
 
-    matching_result = FingerPrintMatching.Check_Fingerprint(citizen[-2], binary_data)#binary_data
-    #---MLAddition---
+    matching_result = FingerPrintMatching.Check_Fingerprint(citizen[-2], binary_data)  # binary_data
+    # ---MLAddition---
     ml_dataset, ml_label = FingerPrintMatching.alternativeTesting()
     ml_knn = Knn.KNN(ml_dataset, ml_label, "minkowski", 2, 2)
     ml_destination = "ml/DB1_B/"
     ml_filename = "101_1.tif"
-    ml_fileBelongsTo = 101       #int(ml_filename[0:3])-100
-    ml_image1 = cv2.imread(ml_destination+ml_filename,0)# Provided manually, could be selected by the client
-    ml_gb_similarity,ml_gb_imfeature1,ml_gb_imfeature2 = FingerPrintMatching.Gabor(ml_image1,ml_image1)
+    ml_fileBelongsTo = 101  # int(ml_filename[0:3])-100
+    ml_image1 = cv2.imread(ml_destination + ml_filename, 0)  # Provided manually, could be selected by the client
+    ml_gb_similarity, ml_gb_imfeature1, ml_gb_imfeature2 = FingerPrintMatching.Gabor(ml_image1, ml_image1)
     ml_test_instance = []
-    ml_test_instance.append(np.ravel(ml_gb_imfeature1,order="F")[0:300])
+    ml_test_instance.append(np.ravel(ml_gb_imfeature1, order="F")[0:300])
     ml_predict = ml_knn.predict(ml_test_instance)
-    print("Filename belongs to:",ml_fileBelongsTo,"ml prediction:",int(ml_predict[0])+100)
+    print("Filename belongs to:", ml_fileBelongsTo, "ml prediction:", int(ml_predict[0]) + 100)
     ml_matchingResult = (int(ml_predict[0]) == ml_fileBelongsTo)
-    #---/MLAddition---
+    # ---/MLAddition---
+    if 'voter' not in session:
+        return redirect('/')
     if matching_result:
         return render_template('voting_election_page.html', person=citizen, elections=elections)
     else:
@@ -123,9 +151,14 @@ def voting_vote_page():
 
 
 @app.route("/candidates", methods=['POST', 'GET'])
+@check_authentication
 def voting_candidate_page():
-    election_id = request.form.get('election_id')
-
+    if request.method == 'GET':
+        return redirect('/')
+    if request.method == 'POST':
+        election_id = request.form.get('election_id')
+    if 'voter' not in session:
+        return redirect('/')
     connectionDB = sqlite3.connect("Government")
     cursor = connectionDB.cursor()
     cursor.execute("SELECT * FROM CandidateElection WHERE ElectionID = ?", (election_id,))
@@ -142,27 +175,35 @@ def voting_candidate_page():
     cursor.close()
     connectionDB.close()
 
-    return render_template("voting_candidate_page.html", candidates=candidates, image=image_base64, election_id=election_id)
+    return render_template("voting_candidate_page.html", candidates=candidates, image=image_base64,
+                           election_id=election_id)
 
 
 @app.route("/complete", methods=['GET', 'POST'])
+@check_authentication
 def complete():
-    global vote_num
-    candidate_id = request.form.get('candidate_id')
+    if 'voter' not in session:
+        return redirect('/')
+    if request.method == 'GET':
+        return redirect("/")
+    if request.method == 'POST':
+        candidate_id = request.form.get('candidate_id')
     connectionDB = sqlite3.connect("Government")
     cursor = connectionDB.cursor()
-    cursor.execute("UPDATE CandidateElection SET CountOfVote = CountOfVote + 1 WHERE CitizenID = ?",(candidate_id,))
-    vote_num = vote_num + 1
+    cursor.execute("UPDATE CandidateElection SET CountOfVote = CountOfVote + 1 WHERE CitizenID = ?", (candidate_id,))
     electionID = request.args.get('election_id')
+    print(candidate_id)
     print(electionID)
-    print(voterID)
-    cursor.execute("INSERT INTO Vote (IsVoted, CitizenID, ElectionID) VALUES (?,?,?)", (True,voterID,electionID))
+    Voterid = session.get('voter')
+    print(Voterid)
+    cursor.execute("INSERT INTO Vote (IsVoted, CitizenID, ElectionID) VALUES (?,?,?)",
+                   (True, Voterid, electionID))
 
     connectionDB.commit()
     cursor.close()
     connectionDB.close()
-    #print(vote_num)
-    return render_template("voting_election_page.html",  person=citizen, elections=elections)
+
+    return render_template("voting_election_page.html", person=citizen, elections=elections)
 
 @app.route("/results", methods=['GET', 'POST'])
 def election_results():
