@@ -4,6 +4,7 @@ import fingerprintVotingSystem
 import base64
 from functools import wraps
 from flask import session, redirect
+import AWS_connection
 
 app = Flask(__name__)
 app.secret_key = "KawakiWoAmeku"
@@ -48,13 +49,13 @@ def Login():  # This function is used for the selectiong operation of the admin.
 
     else:
         adminID = request.form.get('admin_id')
-
-        connectionDB = sqlite3.connect("Government")
-        cursor = connectionDB.cursor()
-        cursor.execute("SELECT * FROM Admin WHERE CitizenID=?", (adminID,))
+        cursor = AWS_connection.establish_connection()
+        #connectionDB = sqlite3.connect("Government")
+        #cursor = connectionDB.cursor()
+        cursor.execute("SELECT * FROM Admin WHERE CitizenID = %s", (adminID,))
         tempAdminID = cursor.fetchone()
         cursor.close()
-        connectionDB.close()
+       # connectionDB.close()
 
         if tempAdminID is None:
             return render_template("adminLogin.html", error="Admin does not exist!")
@@ -82,12 +83,13 @@ def Elections():  # This function is used to call the page in which the admin se
         return redirect("/")
     # In this part, all elections from the database are fetched to be shown in the elections page of the admin.
     global elections
-    connectionDB = sqlite3.connect("Government")
-    cursor = connectionDB.cursor()
+    cursor = AWS_connection.establish_connection()
+    #connectionDB = sqlite3.connect("Government")
+    #cursor = connectionDB.cursor()
     cursor.execute("SELECT * FROM Election")
     elections = cursor.fetchall()
     cursor.close()
-    connectionDB.close()
+   # connectionDB.close()
 
     return render_template("elections.html", elections=elections)  # Fetched elections are send as a parameter.
 
@@ -99,14 +101,15 @@ def RemoveElection():  # This function deletes the selected election from the da
     if request.method == 'GET':
         return redirect("/")
     electionID = request.form.get('ElectionID')
-    connectionDB = sqlite3.connect("Government")
-    cursor = connectionDB.cursor()
-    cursor.execute("DELETE FROM Election WHERE electionID = ?", (electionID,))
+    cursor = AWS_connection.establish_connection()
+    #connectionDB = sqlite3.connect("Government")
+    #cursor = connectionDB.cursor()
+    cursor.execute("DELETE FROM Election WHERE electionID = %s", (electionID,))
     cursor.execute("SELECT * FROM Election")
     elections = cursor.fetchall()  # Fetching new elections list from the database to show it.
-    connectionDB.commit()
+   # connectionDB.commit()
     cursor.close()
-    connectionDB.close()
+   # connectionDB.close()
 
     return render_template("elections.html", elections=elections)
 
@@ -128,14 +131,15 @@ def AddElection():  # If the request is POST, this
         endTime = request.form.get('endTime')
 
         # Adding the election to the database after checking validity of the data retrieved.
-        connectionDB = sqlite3.connect("Government")
-        cursor = connectionDB.cursor()
+        cursor = AWS_connection.establish_connection()
+        #connectionDB = sqlite3.connect("Government")
+        #cursor = connectionDB.cursor()
         cursor.execute(
-            "INSERT INTO Election (Result,DateOfElection,ElectionTime,Description,EndDate,EndTime) VALUES(?, ?, ?, ?, ?, ?)",
+            "INSERT INTO Election (Result,DateOfElection,ElectionTime,Description,EndDate,EndTime) VALUES(%s, %s, %s, %s, %s, %s)",
             (None, date, time, description, endDate, endTime))
-        connectionDB.commit()
+       # connectionDB.commit()
         cursor.close()
-        connectionDB.close()
+       # connectionDB.close()
 
         return redirect(url_for('Elections'))
 
@@ -149,9 +153,10 @@ def UpdateElection():
     if request.method == 'POST' and condition == None:
 
         electionID = request.form.get('ElectionID')
-        connectionDB = sqlite3.connect("Government")
-        cursor = connectionDB.cursor()
-        cursor.execute("SELECT * FROM Election WHERE electionID = ?", (electionID,))
+        cursor = AWS_connection.establish_connection()
+        #connectionDB = sqlite3.connect("Government")
+        #cursor = connectionDB.cursor()
+        cursor.execute("SELECT * FROM Election WHERE electionID = %s", (electionID,))
         updated = cursor.fetchone()
         description = updated[4]
         date = updated[2]
@@ -160,7 +165,7 @@ def UpdateElection():
         endTime = updated[6]
 
         cursor.close()
-        connectionDB.close()
+       # connectionDB.close()
 
         return render_template("updateElection.html", description=description, date=date, time=time,
                                electionID=electionID, endDate=endDate, endTime=endTime)
@@ -172,15 +177,15 @@ def UpdateElection():
         electionID = request.form.get('electionID')
         endDate = request.form.get('endDate')
         endTime = request.form.get('endTime')
-
-        connectionDB = sqlite3.connect("Government")
-        cursor = connectionDB.cursor()
+        cursor = AWS_connection.establish_connection()
+        #connectionDB = sqlite3.connect("Government")
+        #cursor = connectionDB.cursor()
         cursor.execute(
-            "UPDATE Election SET Description = ?, DateOfElection = ?, ElectionTime = ?, EndDate = ?, EndTime = ? WHERE ElectionID = ?",
+            "UPDATE Election SET Description = %s, DateOfElection = %s, ElectionTime = %s, EndDate = %s, EndTime = %s WHERE ElectionID = %s",
             (description, date, time, endDate, endTime, electionID))
-        connectionDB.commit()
+       # connectionDB.commit()
         cursor.close()
-        connectionDB.close()
+       # connectionDB.close()
 
         return redirect(url_for('Elections'))
 
@@ -192,12 +197,13 @@ def Candidates():  # This function is used to call the page in which the admin s
         return redirect("/")
     # In this part, all elections from the database are fetched to be shown in the candidates page of the admin.
     global elections
-    connectionDB = sqlite3.connect("Government")
-    cursor = connectionDB.cursor()
+    cursor = AWS_connection.establish_connection()
+    #connectionDB = sqlite3.connect("Government")
+    #cursor = connectionDB.cursor()
     cursor.execute("SELECT * FROM Election")
     elections = cursor.fetchall()
     cursor.close()
-    connectionDB.close()
+   # connectionDB.close()
 
     # Retrieving all candidates from the "Government" database.
     # connectionDB = sqlite3.connect("Government")
@@ -228,25 +234,26 @@ def AddCandidate():  # This function is used to call the page in which the admin
         candidateID = request.form.get('candidateID')
         electionID = request.form.get('electionID')
 
-        connectionDB = sqlite3.connect("Government")
-        cursor = connectionDB.cursor()
-        cursor.execute("SELECT * FROM CandidateElection WHERE ElectionID = ? AND CitizenID= ?",
+        cursor = AWS_connection.establish_connection()
+        #connectionDB = sqlite3.connect("Government")
+        #cursor = connectionDB.cursor()
+        cursor.execute("SELECT * FROM CandidateElection WHERE ElectionID = %s AND CitizenID= %s",
                        (electionID, candidateID))
         isExist = cursor.fetchone()
 
         if isExist == None:
-            cursor.execute("SELECT * FROM Candidate WHERE CitizenID= ?",
+            cursor.execute("SELECT * FROM Candidate WHERE CitizenID= %s",
                            (candidateID,))
             tempCandidate = cursor.fetchone()
 
             if tempCandidate is None:
-                cursor.execute("INSERT INTO Candidate (CitizenID) VALUES(?)", (candidateID,))
-                connectionDB.commit()
+                cursor.execute("INSERT INTO Candidate (CitizenID) VALUES(%s)", (candidateID,))
+      #          connectionDB.commit()
 
             cursor.execute(
-                "INSERT INTO CandidateElection (CountOfVote,CitizenID,ElectionID) VALUES(?,?,?)",
+                "INSERT INTO CandidateElection (CountOfVote,CitizenID,ElectionID) VALUES(%s,%s,%s)",
                 (0, candidateID, electionID))
-            connectionDB.commit()
+      #      connectionDB.commit()
 
             return redirect(url_for('Candidates'))
 
@@ -263,16 +270,17 @@ def RemoveCandidate():  # This function is used to call the page in which the ad
 
     if condition == '0':
         electionID = request.form.get('ElectionID')
-        connectionDB = sqlite3.connect("Government")
-        cursor = connectionDB.cursor()
-        cursor.execute("SELECT * FROM CandidateElection WHERE ElectionID = ?",
+        cursor = AWS_connection.establish_connection()
+        #connectionDB = sqlite3.connect("Government")
+        #cursor = connectionDB.cursor()
+        cursor.execute("SELECT * FROM CandidateElection WHERE ElectionID = %s",
                        (electionID,))
         candidateElections = cursor.fetchall()
 
         candidatesList = []
         image_base64 = []
         for candidate in candidateElections:
-            cursor.execute("SELECT * FROM Citizen WHERE CitizenID = ?",
+            cursor.execute("SELECT * FROM Citizen WHERE CitizenID = %s",
                            (candidate[1],))
             tempCandidate = cursor.fetchone()
             if tempCandidate is not None:
@@ -280,7 +288,7 @@ def RemoveCandidate():  # This function is used to call the page in which the ad
                 candidatesList.append(tempCandidate)
 
         cursor.close()
-        connectionDB.close()
+       # connectionDB.close()
 
         return render_template("removeCandidate.html", candidatesList=candidatesList, Image=image_base64,
                                electionID=electionID)
@@ -290,24 +298,25 @@ def RemoveCandidate():  # This function is used to call the page in which the ad
         candidateID = request.form.get('candidateID')
         electionID = request.form.get('ElectionID')
 
-        print(candidateID)
-        print(electionID)
-        connectionDB = sqlite3.connect("Government")
-        cursor = connectionDB.cursor()
-        cursor.execute("DELETE FROM CandidateElection WHERE CitizenID = ? and ElectionID = ?",
+        #print(candidateID)
+        #print(electionID)
+        cursor = AWS_connection.establish_connection()
+        #connectionDB = sqlite3.connect("Government")
+        #cursor = connectionDB.cursor()
+        cursor.execute("DELETE FROM CandidateElection WHERE CitizenID = %s and ElectionID = %s",
                        (candidateID, electionID))
-        connectionDB.commit()
+       # connectionDB.commit()
 
         tempCandidate = None
-        cursor.execute("SELECT * FROM CandidateElection WHERE CitizenID = ?", (candidateID,))
+        cursor.execute("SELECT * FROM CandidateElection WHERE CitizenID = %s", (candidateID,))
         tempCandidate = cursor.fetchone()
 
-        print(tempCandidate)
+        #print(tempCandidate)
 
         if tempCandidate is None:
-            cursor.execute("DELETE FROM Candidate WHERE CitizenID = ?",
+            cursor.execute("DELETE FROM Candidate WHERE CitizenID = %s",
                            (candidateID,))
-            connectionDB.commit()
+      #      connectionDB.commit()
 
         return redirect(url_for('Candidates'))
 

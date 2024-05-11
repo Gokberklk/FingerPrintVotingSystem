@@ -2,7 +2,7 @@
 Constants
 """
 
-database_name = "Government"
+#database_name = "Government"
 path_of_image = "Real"
 path_of_face = "Face"
 
