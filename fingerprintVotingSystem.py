@@ -11,7 +11,10 @@ from PIL import Image
 import io
 import cv2
 import functools
+import FingerprintReceiveHandler
 from ml import Knn
+from functools import wraps
+from flask import session, redirect
 #from sklearn.metrics import accuracy_score
 #import matplotlib.pyplot as plt
 
@@ -28,15 +31,6 @@ app = Flask(__name__)
 app.secret_key="KawakiWoAmeku"
 result_of_entered_ID = None
 fingerprint_machine = None
-
-from functools import wraps
-from flask import session, redirect
-
-from functools import wraps
-from flask import session, redirect
-
-from functools import wraps
-from flask import session, redirect
 
 def add_no_cache_headers(response):
     response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
@@ -268,6 +262,24 @@ def calculate():
     print(percentages)
 
     return render_template("election_results.html", candidates=candidates, candidateElections=candidatesElections, form=2, image=image_base64, percentages=percentages)
+
+@app.route("/GetFingerprint", methods=['POST'])
+def GetFingerprint():
+    newList = []
+    ImageSent = request.form["EntireImage"] #:list[bytes]
+    ImageSent = ImageSent[1:len(ImageSent)-1].split(",")
+    for eachToByte in ImageSent:
+        newList.append(int(eachToByte).to_bytes(2,"little"))
+
+    print(newList,len(newList))
+    ImageSent_FileWriter = open("ImageSent.bmp","wb")
+    ImageSent_FileWriter.write(FingerprintReceiveHandler.assembleBMPHeader(
+         FingerprintReceiveHandler.IMAGE_WIDTH, FingerprintReceiveHandler.IMAGE_HEIGHT,
+         FingerprintReceiveHandler.IMAGE_DEPTH, True))
+    for eachByte in newList:
+        ImageSent_FileWriter.write(eachByte)
+    ImageSent_FileWriter.close()
+    return 0
 
 
 def CalculatePercentages(candidateElections):
