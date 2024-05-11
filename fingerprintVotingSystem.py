@@ -2,6 +2,8 @@ import base64
 
 from flask import *
 import sqlite3
+
+import AWS_connection
 # import DataBaseOperation
 import FingerPrintMatching
 import numpy as np
@@ -45,14 +47,13 @@ def check_authentication(view_func):
     return wrapped_function
 
 
-
-
 @app.route("/", methods=['POST', 'GET'])
 def voting_id_page():  # Main page of voting screen
-    connection = sqlite3.connect("Government")
-    cursor = connection.cursor()
+    cursor = AWS_connection.establish_connection()
+    #connection = sqlite3.connect("Government")
+    #cursor = connection.cursor()
     cursor.execute("DELETE FROM Vote")
-    connection.commit()
+   # connection.commit()
     session.clear()
 
     return render_template('voting_id_page.html')
@@ -63,11 +64,12 @@ def voting_fingerprint_page():  # Fingerprint identification screen
     global citizen
     global Machine_ID
     entered_id = request.form.get('voter_id')
-    connection = sqlite3.connect("Government")
-    cursor = connection.cursor()
-    cursor.execute("SELECT * FROM Citizen WHERE CitizenID = :id", {'id': int(entered_id)})
+    cursor = AWS_connection.establish_connection()
+    #connection = sqlite3.connect("Government")
+    #cursor = connection.cursor()
+    cursor.execute("SELECT * FROM Citizen WHERE CitizenID = %s", (entered_id,))
     citizen = cursor.fetchone()
-    cursor.execute("SELECT * FROM Vote WHERE CitizenID = :id", {'id': int(entered_id)})
+    cursor.execute("SELECT * FROM Vote WHERE CitizenID = %s", (entered_id,))
     isvoted = cursor.fetchall()
 
     if len(isvoted) == numberOfElectionsActive:
@@ -75,7 +77,7 @@ def voting_fingerprint_page():  # Fingerprint identification screen
         return render_template('voting_id_page.html', error="You have already voted!")
 
     cursor.close()
-    connection.close()
+  #  connection.close()
     if citizen != None and int(entered_id) == citizen[0]:
         image1_blob_file = io.BytesIO(citizen[-2])
         image_1 = Image.open(image1_blob_file)
@@ -87,7 +89,7 @@ def voting_fingerprint_page():  # Fingerprint identification screen
                                       image1array)  # the fingerprint which is taken from the machine will be displayed for voter to see
         image_base64 = base64.b64encode(buffer).decode('utf-8')
         session['voter'] = entered_id
-        print(session['voter'])
+        #print(session['voter'])
         return render_template('voting_fingerprint_page.html', voter_fingerprint=image_base64)
     #elif isvoted[0] == True:
     #   return render_template('voting_id_page.html', error="You have already voted!")
@@ -107,14 +109,15 @@ def voting_vote_page():
         return redirect("/")
     if request.method == 'POST':
         fingerprint = request.files['voter_fingerprint']
-    connectionDB = sqlite3.connect("Government")
-    cursor = connectionDB.cursor()
-    cursor.execute("SELECT * FROM Citizen WHERE CitizenID = ?", (55555555555,))
+    cursor = AWS_connection.establish_connection()
+    #connectionDB = sqlite3.connect("Government")
+    #cursor = connectionDB.cursor()
+    cursor.execute("SELECT * FROM Citizen WHERE CitizenID = %s", (55555555555,))
     citizen2 = cursor.fetchone()
     cursor.execute("SELECT * FROM Election")
     elections = cursor.fetchall()
     cursor.close()
-    connectionDB.close()
+   # connectionDB.close()
     # Convert the retrieved binary image data to a PIL Image object
     # Save the image to a file
     # print(fingerprint)
@@ -139,7 +142,7 @@ def voting_vote_page():
     ml_test_instance = []
     ml_test_instance.append(np.ravel(ml_gb_imfeature1, order="F")[0:300])
     ml_predict = ml_knn.predict(ml_test_instance)
-    print("Filename belongs to:", ml_fileBelongsTo, "ml prediction:", int(ml_predict[0]) + 100)
+    #print("Filename belongs to:", ml_fileBelongsTo, "ml prediction:", int(ml_predict[0]) + 100)
     ml_matchingResult = (int(ml_predict[0]) == ml_fileBelongsTo)
     # ---/MLAddition---
     if 'voter' not in session:
@@ -159,21 +162,22 @@ def voting_candidate_page():
         election_id = request.form.get('election_id')
     if 'voter' not in session:
         return redirect('/')
-    connectionDB = sqlite3.connect("Government")
-    cursor = connectionDB.cursor()
-    cursor.execute("SELECT * FROM CandidateElection WHERE ElectionID = ?", (election_id,))
+    cursor = AWS_connection.establish_connection()
+    #connectionDB = sqlite3.connect("Government")
+    #cursor = connectionDB.cursor()
+    cursor.execute("SELECT * FROM CandidateElection WHERE ElectionID = %s", (election_id,))
     candidatesElections = cursor.fetchall()
     candidates = []
     image_base64 = []
     for i in range(len(candidatesElections)):
-        cursor.execute("SELECT * FROM Citizen WHERE CitizenID = ?", (candidatesElections[i][1],))
+        cursor.execute("SELECT * FROM Citizen WHERE CitizenID = %s", (candidatesElections[i][1],))
         temp_candidates = cursor.fetchone()
         candidates.append(temp_candidates)
 
         image_base64.append(base64.b64encode(candidates[i][-1]).decode('utf-8'))
 
     cursor.close()
-    connectionDB.close()
+   # connectionDB.close()
 
     return render_template("voting_candidate_page.html", candidates=candidates, image=image_base64,
                            election_id=election_id)
@@ -188,20 +192,21 @@ def complete():
         return redirect("/")
     if request.method == 'POST':
         candidate_id = request.form.get('candidate_id')
-    connectionDB = sqlite3.connect("Government")
-    cursor = connectionDB.cursor()
-    cursor.execute("UPDATE CandidateElection SET CountOfVote = CountOfVote + 1 WHERE CitizenID = ?", (candidate_id,))
+    cursor = AWS_connection.establish_connection()
+    #connectionDB = sqlite3.connect("Government")
+    #cursor = connectionDB.cursor()
+    cursor.execute("UPDATE CandidateElection SET CountOfVote = CountOfVote + 1 WHERE CitizenID = %s", (candidate_id,))
     electionID = request.args.get('election_id')
-    print(candidate_id)
-    print(electionID)
+    #print(candidate_id)
+    #print(electionID)
     Voterid = session.get('voter')
-    print(Voterid)
-    cursor.execute("INSERT INTO Vote (IsVoted, CitizenID, ElectionID) VALUES (?,?,?)",
+    #print(Voterid)
+    cursor.execute("INSERT INTO Vote (IsVoted, CitizenID, ElectionID) VALUES (%s,%s,%s)",
                    (True, Voterid, electionID))
 
-    connectionDB.commit()
+   # connectionDB.commit()
     cursor.close()
-    connectionDB.close()
+   # connectionDB.close()
 
     return render_template("voting_election_page.html", person=citizen, elections=elections)
 
@@ -209,12 +214,13 @@ def complete():
 def election_results():
 
      #We connect database and pull elections from it to be displayed in results page.
-    connectionDB = sqlite3.connect("Government")
-    cursor = connectionDB.cursor()
+    cursor = AWS_connection.establish_connection()
+    #connectionDB = sqlite3.connect("Government")
+    #cursor = connectionDB.cursor()
     cursor.execute("SELECT * FROM Election")
     electionList = cursor.fetchall()
     cursor.close()
-    connectionDB.close()
+   # connectionDB.close()
 
     #We have 2 forms in results page. First one is for selecting an election to see results of it,
     #and the second one displays the results of the selected election.
@@ -229,22 +235,22 @@ def election_results():
 def calculate():
     election_id = request.form.get('election_id')#We get election id to display votes of its candidates.
 
-
     #We access the database and pull candidates of selected elections, their counts and pictures.
-    connectionDB = sqlite3.connect("Government")
-    cursor = connectionDB.cursor()
-    cursor.execute("SELECT * FROM CandidateElection WHERE ElectionID = ?", (election_id,))
+    cursor = AWS_connection.establish_connection()
+    #connectionDB = sqlite3.connect("Government")
+    #cursor = connectionDB.cursor()
+    cursor.execute("SELECT * FROM CandidateElection WHERE ElectionID = %s", (election_id,))
     candidatesElections = cursor.fetchall()
     candidates = []
     image_base64 = []
     for i in range(len(candidatesElections)):
-        cursor.execute("SELECT * FROM Citizen WHERE CitizenID = ?", (candidatesElections[i][1],))
+        cursor.execute("SELECT * FROM Citizen WHERE CitizenID = %s", (candidatesElections[i][1],))
         temp_candidates = cursor.fetchone()
         candidates.append(temp_candidates)
 
         image_base64.append(base64.b64encode(candidates[i][-1]).decode('utf-8'))
     cursor.close()
-    connectionDB.close()
+   # connectionDB.close()
 
     percentages = CalculatePercentages(candidatesElections)
 
