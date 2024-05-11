@@ -63,7 +63,7 @@ def voting_id_page():  # Main page of voting screen
     cursor = AWS_connection.establish_connection()
     #connection = sqlite3.connect("Government")
     #cursor = connection.cursor()
-    cursor.execute("DELETE FROM Vote")
+    #cursor.execute("DELETE FROM Vote")
    # connection.commit()
     session.clear()
 
