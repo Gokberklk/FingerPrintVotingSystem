@@ -6,8 +6,6 @@
 
             {% for candidate in candidates %}
                 <td align="middle" style="font-weight: bolder">Candidate<img src="data:image/png;base64,{{ image[candidates.index(candidate)] }}" height="100" width="80"><br><br><p>{{candidate[1]+"\n"+candidate[2]}}</p>
-                    <input type="radio" id="radio" name="candidate"></td> <!--Image will be displayed here-->
-                <input type="hidden" name="candidate_id" value="{{candidate[0]}}">
             {% endfor %}
         </table>
             <button class="btn btn-success" style="float: right;margin-right: 300px; width: 25%;height: 10%;font-size: larger">Complete Voting</button>
