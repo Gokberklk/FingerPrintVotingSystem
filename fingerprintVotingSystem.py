@@ -38,6 +38,17 @@ from flask import session, redirect
 from functools import wraps
 from flask import session, redirect
 
+def add_no_cache_headers(response):
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
+
+
+@app.after_request
+def apply_no_cache(response):
+    return add_no_cache_headers(response)
+
 def check_authentication(view_func):
     @wraps(view_func)
     def wrapped_function(*args, **kwargs):
