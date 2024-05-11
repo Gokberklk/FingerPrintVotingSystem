@@ -1,5 +1,3 @@
-
-
 s_box = (
     0x63, 0x7C, 0x77, 0x7B, 0xF2, 0x6B, 0x6F, 0xC5, 0x30, 0x01, 0x67, 0x2B, 0xFE, 0xD7, 0xAB, 0x76,
     0xCA, 0x82, 0xC9, 0x7D, 0xFA, 0x59, 0x47, 0xF0, 0xAD, 0xD4, 0xA2, 0xAF, 0x9C, 0xA4, 0x72, 0xC0,
@@ -62,6 +60,7 @@ def inv_shift_rows(s):
     s[0][2], s[1][2], s[2][2], s[3][2] = s[2][2], s[3][2], s[0][2], s[1][2]
     s[0][3], s[1][3], s[2][3], s[3][3] = s[1][3], s[2][3], s[3][3], s[0][3]
 
+
 def add_round_key(s, k):
     for i in range(4):
         for j in range(4):
@@ -110,15 +109,18 @@ r_con = (
 
 def bytes2matrix(text):
     """ Converts a 16-byte array into a 4x4 matrix.  """
-    return [list(text[i:i+4]) for i in range(0, len(text), 4)]
+    return [list(text[i: i + 4]) for i in range(0, len(text), 4)]
+
 
 def matrix2bytes(matrix):
     """ Converts a 4x4 matrix into a 16-byte array.  """
     return bytes(sum(matrix, []))
 
+
 def xor_bytes(a, b):
     """ Returns a new byte array with the elements xor'ed. """
-    return bytes(i^j for i, j in zip(a, b))
+    return bytes(i ^ j for i, j in zip(a, b))
+
 
 def inc_bytes(a):
     """ Returns a new byte array with the value increment by 1 """
@@ -131,6 +133,7 @@ def inc_bytes(a):
             break
     return bytes(out)
 
+
 def pad(plaintext):
     """
     Pads the given plaintext with PKCS#7 padding to a multiple of 16 bytes.
@@ -140,6 +143,7 @@ def pad(plaintext):
     padding_len = 16 - (len(plaintext) % 16)
     padding = bytes([padding_len] * padding_len)
     return plaintext + padding
+
 
 def unpad(plaintext):
     """
@@ -152,9 +156,10 @@ def unpad(plaintext):
     assert all(p == padding_len for p in padding)
     return message
 
+
 def split_blocks(message, block_size=16, require_padding=True):
-        assert len(message) % block_size == 0 or not require_padding
-        return [message[i:i+16] for i in range(0, len(message), block_size)]
+    assert len(message) % block_size == 0 or not require_padding
+    return [message[i: i + 16] for i in range(0, len(message), block_size)]
 
 
 class AES:
@@ -165,6 +170,7 @@ class AES:
     management. Unless you need that, please use `encrypt` and `decrypt`.
     """
     rounds_by_key_size = {16: 10, 24: 12, 32: 14}
+
     def __init__(self, master_key):
         """
         Initializes the object with a given key.
@@ -205,7 +211,7 @@ class AES:
             key_columns.append(word)
 
         # Group key words in 4x4 byte matrices.
-        return [key_columns[4*i : 4*(i+1)] for i in range(len(key_columns) // 4)]
+        return [key_columns[4 * i: 4 * (i + 1)] for i in range(len(key_columns) // 4)]
 
     def encrypt_block(self, plaintext):
         """
@@ -300,7 +306,8 @@ class AES:
         prev_plaintext = bytes(16)
         for plaintext_block in split_blocks(plaintext):
             # PCBC mode encrypt: encrypt(plaintext_block XOR (prev_ciphertext XOR prev_plaintext))
-            ciphertext_block = self.encrypt_block(xor_bytes(plaintext_block, xor_bytes(prev_ciphertext, prev_plaintext)))
+            ciphertext_block = self.encrypt_block(
+                xor_bytes(plaintext_block, xor_bytes(prev_ciphertext, prev_plaintext)))
             blocks.append(ciphertext_block)
             prev_ciphertext = ciphertext_block
             prev_plaintext = plaintext_block
@@ -319,7 +326,8 @@ class AES:
         prev_plaintext = bytes(16)
         for ciphertext_block in split_blocks(ciphertext):
             # PCBC mode decrypt: (prev_plaintext XOR prev_ciphertext) XOR decrypt(ciphertext_block)
-            plaintext_block = xor_bytes(xor_bytes(prev_ciphertext, prev_plaintext), self.decrypt_block(ciphertext_block))
+            plaintext_block = xor_bytes(xor_bytes(prev_ciphertext, prev_plaintext),
+                                        self.decrypt_block(ciphertext_block))
             blocks.append(plaintext_block)
             prev_ciphertext = ciphertext_block
             prev_plaintext = plaintext_block
@@ -436,6 +444,7 @@ IV_SIZE = 16
 SALT_SIZE = 16
 HMAC_SIZE = 32
 
+
 def get_key_iv(password, salt, workload=100000):
     """
     Stretches the password and extracts an AES key, an HMAC key and an AES
@@ -504,18 +513,18 @@ def benchmark():
     for i in range(30000):
         aes.encrypt_block(message)
 
+
 __all__ = ["encrypt", "decrypt", "AES"]
 
-def main():
-    print("Enter 'encrypt' or 'decrypt' followed by the key and the BLOB input:")
 
-    command = input().strip().lower()
+def main(command, key, blob_input):
+    command = command.strip().lower()
     if command not in {'encrypt', 'decrypt'}:
         print("Invalid command. Please enter 'encrypt' or 'decrypt'.")
         return
 
-    key = input("Enter the key: ").strip()
-    blob_input = input("Enter the BLOB input: ").strip().encode('utf-8')
+    key = key.strip()
+    blob_input = blob_input.strip().encode('utf-8')
 
     if command == 'encrypt':
         encrypted_blob = encrypt(key, blob_input)
@@ -526,6 +535,7 @@ def main():
             print("Decrypted BLOB:", decrypted_blob.decode('utf-8'))
         except Exception as e:
             print("Decryption failed:", str(e))
+
 
 if __name__ == '__main__':
     main()
