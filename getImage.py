@@ -147,4 +147,7 @@ if __name__ == "__main__":
     # args = parser.parse_args()
 
     # getFingerprintImage(args.portNum, args.baudRate, args.outputFileName)
+
     getFingerprintImage("COM6", 57600, "")
+    Logger.log("The Image Retrieval Process has been finished")
+    time.sleep(3)

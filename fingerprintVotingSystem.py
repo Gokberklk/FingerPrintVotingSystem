@@ -73,6 +73,7 @@ def voting_fingerprint_page():  # Fingerprint identification screen
     cursor = AWS_connection.establish_connection()
     #connection = sqlite3.connect("Government")
     #cursor = connection.cursor()
+
     cursor.execute("SELECT * FROM Citizen WHERE CitizenID = %s", (entered_id,))
     citizen = cursor.fetchone()
     cursor.execute("SELECT * FROM Vote WHERE CitizenID = %s", (entered_id,))
@@ -266,7 +267,7 @@ def calculate():
 
 @app.route("/GetFingerprint", methods=['POST'])
 def GetFingerprint():
-    Logger.log(f"The Fingerprint with username {str()} has been received")
+    Logger.log(f"The Fingerprint with userID {citizen[0]} has been received")
     # newList = []
     # ImageSent = request.form["EntireImage"] #:list[bytes]
     # ImageSent = ImageSent[1:len(ImageSent)-1].split(",")
@@ -283,7 +284,7 @@ def GetFingerprint():
         # Decryption Failed, Use here to handle it
         pass
     Logger.log("The Fingerprint file has been created")
-    ImageSent_FileWriter = open("ImageSent.bmp","wb")
+    ImageSent_FileWriter = open(citizen[0]+".bmp","wb")
     ImageSent_FileWriter.write(FingerprintBitmapHeader.assembleBMPHeader(
          FingerprintBitmapHeader.IMAGE_WIDTH, FingerprintBitmapHeader.IMAGE_HEIGHT,
          FingerprintBitmapHeader.IMAGE_DEPTH, True))
