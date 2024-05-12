@@ -528,14 +528,17 @@ def main(command, key, blob_input):
 
     if command == 'encrypt':
         encrypted_blob = encrypt(key, blob_input)
-        print("Encrypted BLOB:", encrypted_blob.hex())
+        #print("Encrypted BLOB:", encrypted_blob.hex())
+        return encrypted_blob.hex()# returns are added to benefit from the AES.main()
     elif command == 'decrypt':
         try:
             decrypted_blob = decrypt(key, bytes.fromhex(blob_input.decode('utf-8')))
-            print("Decrypted BLOB:", decrypted_blob.decode('utf-8'))
+            #print("Decrypted BLOB:", decrypted_blob.decode('utf-8'))
+            return decrypted_blob.decode("utf-8") # returns are added to benefit from the AES.main()
         except Exception as e:
             print("Decryption failed:", str(e))
+            return None
 
 
 if __name__ == '__main__':
-    main()
+    main("encrypt","osman",[1,2,3,4,5])
