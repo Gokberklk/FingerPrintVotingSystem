@@ -284,7 +284,7 @@ def GetFingerprint():
         # Decryption Failed, Use here to handle it
         pass
     Logger.log("The Fingerprint file has been created")
-    ImageSent_FileWriter = open(citizen[0]+".bmp","wb")
+    ImageSent_FileWriter = open("ImageSent/"+str(citizen[0])+".bmp","wb")
     ImageSent_FileWriter.write(FingerprintBitmapHeader.assembleBMPHeader(
          FingerprintBitmapHeader.IMAGE_WIDTH, FingerprintBitmapHeader.IMAGE_HEIGHT,
          FingerprintBitmapHeader.IMAGE_DEPTH, True))
@@ -292,7 +292,7 @@ def GetFingerprint():
     Logger.log("The Fingerprint has been saved")
     # for eachByte in newList:
     #     ImageSent_FileWriter.write(eachByte)
-    # ImageSent_FileWriter.close()
+    ImageSent_FileWriter.close()
     return Response(status=204)# response with status 204 (no content)
 
 
