@@ -12,6 +12,9 @@ import io
 import cv2
 import functools
 from ml import Knn
+
+
+
 #from sklearn.metrics import accuracy_score
 #import matplotlib.pyplot as plt
 
@@ -20,7 +23,7 @@ from ml import Knn
 citizen = None
 numberOfElectionsActive = 2
 candidates = None  # This variable holds the candidates to be displayed.
-elections = "Election 1"  # This variable holds the elections to be displayed.
+elections = None  # This variable holds the elections to be displayed.
 Machine_ID = None
 
 
@@ -63,7 +66,7 @@ def voting_id_page():  # Main page of voting screen
     cursor = AWS_connection.establish_connection()
     #connection = sqlite3.connect("Government")
     #cursor = connection.cursor()
-    #cursor.execute("DELETE FROM Vote")
+    cursor.execute("DELETE FROM Vote")
    # connection.commit()
     session.clear()
 
@@ -121,13 +124,14 @@ def voting_vote_page():
     if request.method == 'POST':
         fingerprint = request.files['voter_fingerprint']
     cursor = AWS_connection.establish_connection()
-    #connectionDB = sqlite3.connect("Government")
-    #cursor = connectionDB.cursor()
+
     cursor.execute("SELECT * FROM Citizen WHERE CitizenID = %s", (55555555555,))
     citizen2 = cursor.fetchone()
     cursor.execute("SELECT * FROM Election")
     elections = cursor.fetchall()
     cursor.close()
+
+
    # connectionDB.close()
     # Convert the retrieved binary image data to a PIL Image object
     # Save the image to a file
@@ -208,19 +212,26 @@ def complete():
     #cursor = connectionDB.cursor()
     cursor.execute("UPDATE CandidateElection SET CountOfVote = CountOfVote + 1 WHERE CitizenID = %s", (candidate_id,))
     electionID = request.args.get('election_id')
-    #print(candidate_id)
-    #print(electionID)
     Voterid = session.get('voter')
-    #print(Voterid)
+
     cursor.execute("INSERT INTO Vote (IsVoted, CitizenID, ElectionID) VALUES (%s,%s,%s)",
                    (True, Voterid, electionID))
-
-   # connectionDB.commit()
     cursor.close()
-   # connectionDB.close()
 
-    return render_template("voting_election_page.html", person=citizen, elections=elections)
-
+    global elections
+    election_id_to_remove = electionID
+    print(type(election_id_to_remove))
+    #elections = [election for election in elections if election[0] != election_id_to_remove]
+    i = 0
+    for election in elections:
+        print(election[0])
+        if election[0] == int(election_id_to_remove):
+            elections.pop(i)
+            break
+    if len(elections) != 0:
+        return render_template("voting_election_page.html", person=citizen, elections=elections)
+    elif len(elections) == 0:
+        return render_template("voting_id_page.html",error="Voting successfully completed.")
 @app.route("/results", methods=['GET', 'POST'])
 def election_results():
 
