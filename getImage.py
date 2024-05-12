@@ -6,6 +6,8 @@ import codecs
 import serial, time, argparse, struct
 import requests
 
+import AES
+
 IMAGE_WIDTH = 256
 IMAGE_HEIGHT = 288
 IMAGE_DEPTH = 8
@@ -76,36 +78,42 @@ def getFingerprintImage(portNum, baudRate, outputFileName):
     try:
         # Assume everything received at first is printable
         currByte = ''
-        currByteArray: list[bytes] = []
+        currByteString=""
+        #-------------------------------------------------
         while currByte != IMAGE_START_SIGNATURE:
             currByte = port.read()
             print(currByte.decode(errors='ignore'), end='')
 
         # The datasheet says the sensor sends 1 byte for every 2 pixels
         totalBytesExpected = (IMAGE_WIDTH * IMAGE_HEIGHT) // 2
-
+        #-------------------------------------------------
         for i in range(totalBytesExpected):
             currByte = port.read()
-            currByteArray.append(currByte * 2)
-
+            currByteString += (currByte * 2).decode(encoding="ISO-8859-1")
+            # -------------------------------------------------
             # Exit if we failed to read anything within the defined timeout
             if not currByte:
                 print("Read timed out.")
                 return False
+            # -------------------------------------------------
+
 
             # Since each received byte contains info for 2 adjacent pixels,
             # assume that both pixels were originally close enough in colour
             # to now be assigned the same colour
             # outFile.write(currByte * 2)
 
-        currByteArray_Stringified = [int.from_bytes(eachByte, "little") for eachByte in currByteArray]
-        requests.post("http://127.0.0.1:5000/GetFingerprint", data={"EntireImage": str(currByteArray_Stringified)})
 
+        currByteString_AES = AES.main("encrypt","Dondulamanda Şondulamanda Zanga Banga Pondulamanda",currByteString)# Key taken from well-known TRT Child cartoon 'Keloglan'
+        requests.post("http://127.0.0.1:5000/GetFingerprint", data={"EntireImage": currByteString_AES})
+
+
+        #-------------------------------------------------
         # print anything that's left, until the inter-byte timeout fires
         while currByte:
             currByte = port.read()
             print(currByte.decode(errors='ignore'), end='')
-
+        #-------------------------------------------------
         print("[Image saved to {}]".format(outputFileName))
 
         return True
@@ -134,4 +142,4 @@ if __name__ == "__main__":
     # args = parser.parse_args()
 
     # getFingerprintImage(args.portNum, args.baudRate, args.outputFileName)
-    getFingerprintImage("COM9", 57600, "")
+    getFingerprintImage("COM6", 57600, "")

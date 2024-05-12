@@ -11,7 +11,7 @@ from PIL import Image
 import io
 import cv2
 import functools
-import FingerprintReceiveHandler
+import FingerprintBitmapHeader,AES
 from ml import Knn
 from functools import wraps
 from flask import session, redirect
@@ -265,20 +265,27 @@ def calculate():
 
 @app.route("/GetFingerprint", methods=['POST'])
 def GetFingerprint():
-    newList = []
-    ImageSent = request.form["EntireImage"] #:list[bytes]
-    ImageSent = ImageSent[1:len(ImageSent)-1].split(",")
-    for eachToByte in ImageSent:
-        newList.append(int(eachToByte).to_bytes(2,"little"))
+    # newList = []
+    # ImageSent = request.form["EntireImage"] #:list[bytes]
+    # ImageSent = ImageSent[1:len(ImageSent)-1].split(",")
+    # for eachToByte in ImageSent:
+    #     newList.append(int(eachToByte).to_bytes(2,"little"))
 
-    print(newList,len(newList))
+    # print(newList,len(newList))
+    currByteString_AES = request.form["EntireImage"]
+    currByteString = AES.main("decrypt","Dondulamanda Şondulamanda Zanga Banga Pondulamanda",currByteString_AES)
+    currByte = str.encode(currByteString,encoding="ISO-8859-1")
+    if currByteString is None:
+        # Decryption Failed, Use here to handle it
+        pass
     ImageSent_FileWriter = open("ImageSent.bmp","wb")
-    ImageSent_FileWriter.write(FingerprintReceiveHandler.assembleBMPHeader(
-         FingerprintReceiveHandler.IMAGE_WIDTH, FingerprintReceiveHandler.IMAGE_HEIGHT,
-         FingerprintReceiveHandler.IMAGE_DEPTH, True))
-    for eachByte in newList:
-        ImageSent_FileWriter.write(eachByte)
-    ImageSent_FileWriter.close()
+    ImageSent_FileWriter.write(FingerprintBitmapHeader.assembleBMPHeader(
+         FingerprintBitmapHeader.IMAGE_WIDTH, FingerprintBitmapHeader.IMAGE_HEIGHT,
+         FingerprintBitmapHeader.IMAGE_DEPTH, True))
+    ImageSent_FileWriter.write(currByte)
+    # for eachByte in newList:
+    #     ImageSent_FileWriter.write(eachByte)
+    # ImageSent_FileWriter.close()
     return 0
 
 
