@@ -7,6 +7,7 @@ import serial, time, argparse, struct
 import requests
 
 import AES
+from logger import Logger
 
 IMAGE_WIDTH = 256
 IMAGE_HEIGHT = 288
@@ -63,12 +64,14 @@ def assembleBMPHeader(width, height, depth, includePalette=False):
 
 
 def getFingerprintImage(portNum, baudRate, outputFileName):
+    Logger.log(f"The serial connection through com port:{portNum} with baud rate:{baudRate} has been initialized")
     try:
         port = serial.Serial(portNum, baudRate, timeout=0.1, inter_byte_timeout=0.1)
     except Exception as e:
         print('Port open failed:', e)
+        Logger.log(f"The serial connection through com port:{portNum} with baud rate:{baudRate} has been terminated")
         return False
-
+    Logger.log(f"The serial connection through com port:{portNum} with baud rate:{baudRate} has been established")
     # outFile = open(outputFileName, "wb")
     # outFile.write(assembleBMPHeader(IMAGE_WIDTH, IMAGE_HEIGHT, IMAGE_DEPTH, True))
 
@@ -86,6 +89,7 @@ def getFingerprintImage(portNum, baudRate, outputFileName):
 
         # The datasheet says the sensor sends 1 byte for every 2 pixels
         totalBytesExpected = (IMAGE_WIDTH * IMAGE_HEIGHT) // 2
+        Logger.log("The fingerprint image retrieval has been started. preferred encoding:ISO-8859-1")
         #-------------------------------------------------
         for i in range(totalBytesExpected):
             currByte = port.read()
@@ -93,7 +97,7 @@ def getFingerprintImage(portNum, baudRate, outputFileName):
             # -------------------------------------------------
             # Exit if we failed to read anything within the defined timeout
             if not currByte:
-                print("Read timed out.")
+                Logger.log("Read timed out.Terminating...")
                 return False
             # -------------------------------------------------
 
@@ -103,10 +107,11 @@ def getFingerprintImage(portNum, baudRate, outputFileName):
             # to now be assigned the same colour
             # outFile.write(currByte * 2)
 
-
+        Logger.log("AES Encryption has been started")
         currByteString_AES = AES.main("encrypt","Dondulamanda Şondulamanda Zanga Banga Pondulamanda",currByteString)# Key taken from well-known TRT Child cartoon 'Keloglan'
+        Logger.log("AES Encryption has been done")
         requests.post("http://127.0.0.1:5000/GetFingerprint", data={"EntireImage": currByteString_AES})
-
+        Logger.log("HTTP Post Request has been created and sent")
 
         #-------------------------------------------------
         # print anything that's left, until the inter-byte timeout fires
@@ -114,7 +119,7 @@ def getFingerprintImage(portNum, baudRate, outputFileName):
             currByte = port.read()
             print(currByte.decode(errors='ignore'), end='')
         #-------------------------------------------------
-        print("[Image saved to {}]".format(outputFileName))
+        Logger.log("The Encryted Fingerprint image has been uploaded via HTTP Post Request")
 
         return True
 
@@ -122,7 +127,7 @@ def getFingerprintImage(portNum, baudRate, outputFileName):
         return False
 
     except Exception as e:
-        print("getFingerprint() failed: ", e)
+        Logger.log(f"getFingerprint() failed with an exception: {e} ")
         return False
 
     finally:

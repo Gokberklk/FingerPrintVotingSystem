@@ -12,6 +12,7 @@ import io
 import cv2
 import functools
 import FingerprintBitmapHeader,AES
+from logger import Logger
 from ml import Knn
 from functools import wraps
 from flask import session, redirect
@@ -265,6 +266,7 @@ def calculate():
 
 @app.route("/GetFingerprint", methods=['POST'])
 def GetFingerprint():
+    Logger.log(f"The Fingerprint with username {str()} has been received")
     # newList = []
     # ImageSent = request.form["EntireImage"] #:list[bytes]
     # ImageSent = ImageSent[1:len(ImageSent)-1].split(",")
@@ -273,20 +275,26 @@ def GetFingerprint():
 
     # print(newList,len(newList))
     currByteString_AES = request.form["EntireImage"]
+    Logger.log("AES Decryption has been started")
     currByteString = AES.main("decrypt","Dondulamanda Şondulamanda Zanga Banga Pondulamanda",currByteString_AES)
+    Logger.log("AES Decryption has been done")
     currByte = str.encode(currByteString,encoding="ISO-8859-1")
     if currByteString is None:
         # Decryption Failed, Use here to handle it
         pass
+    Logger.log("The Fingerprint file has been created")
     ImageSent_FileWriter = open("ImageSent.bmp","wb")
     ImageSent_FileWriter.write(FingerprintBitmapHeader.assembleBMPHeader(
          FingerprintBitmapHeader.IMAGE_WIDTH, FingerprintBitmapHeader.IMAGE_HEIGHT,
          FingerprintBitmapHeader.IMAGE_DEPTH, True))
     ImageSent_FileWriter.write(currByte)
+    Logger.log("The Fingerprint has been saved")
     # for eachByte in newList:
     #     ImageSent_FileWriter.write(eachByte)
     # ImageSent_FileWriter.close()
-    return 0
+    return Response(status=204)# response with status 204 (no content)
+
+
 
 
 def CalculatePercentages(candidateElections):
@@ -301,6 +309,11 @@ def CalculatePercentages(candidateElections):
         percentages.append(candidate[0]/total * 100)
 
     return percentages
+
+
+
+
+
 
 
 if __name__ == '__main__':
