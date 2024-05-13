@@ -113,13 +113,14 @@ def voting_vote_page():
 
     cursor.execute("SELECT * FROM Election")
     elections = cursor.fetchall()
-    cursor.close()
-
     # Convert the retrieved binary image data to a PIL Image object
     Voterid = session.get('voter')
     image_path = os.path.join("ImageSent", f"{Voterid}.bmp")
-    binary_data = Image.open(image_path)
-
+    binary_data = fingerprint.read()
+    #binary_data = Image.open(image_path)
+    cursor.execute("SELECT * FROM Citizen WHERE CitizenID = %s", (Voterid,))
+    citizen = cursor.fetchone()
+    cursor.close()
     matching_result = FingerPrintMatching.Check_Fingerprint(citizen[-2], binary_data)  # binary_data
 
     if 'voter' not in session:
@@ -162,28 +163,25 @@ def voting_candidate_page():
 @app.route("/complete", methods=['GET', 'POST'])
 @check_authentication
 def complete():
+    global elections
+    #print(elections)
     if 'voter' not in session:
         return redirect('/')
     if request.method == 'GET':
         return redirect("/")
     if request.method == 'POST':
         candidate_id = request.form.get('candidate_id')
+        electionID = request.args.get('election_id')
     cursor = AWS_connection.establish_connection()
     cursor.execute("UPDATE CandidateElection SET CountOfVote = CountOfVote + 1 WHERE CitizenID = %s", (candidate_id,))
-    electionID = request.args.get('election_id')
     Voterid = session.get('voter')
-
     cursor.execute("INSERT INTO Vote (IsVoted, CitizenID, ElectionID) VALUES (%s,%s,%s)",
                    (True, Voterid, electionID))
     cursor.close()
-
-    global elections
     election_id_to_remove = electionID
-    print(type(election_id_to_remove))
     # elections = [election for election in elections if election[0] != election_id_to_remove]
     i = 0
     for election in elections:
-        print(election[0])
         if election[0] == int(election_id_to_remove):
             elections.pop(i)
             break
