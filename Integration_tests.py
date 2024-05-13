@@ -4,14 +4,19 @@ from selenium.webdriver.common.keys import Keys
 import pytest
 import time
 
+screenshots = "C://Users//USER//Desktop//School//GraduationProject//FingerPrintVotingSystem//Screenshots//"
+
 
 # Adem Garip
 def ID_check_success():
     time.sleep(5)
+    driver.save_screenshot(screenshots+"screenshot1.png")
     enter_id = driver.find_element(By.ID, "voter_id")
     enter_id.send_keys("55555555555")
+    driver.save_screenshot(screenshots + "screenshot10.png")
     check_id = driver.find_element(By.ID, "check_id")
     check_id.click()
+    driver.save_screenshot(screenshots + "screenshot2.png")
     time.sleep(10)
 
 
@@ -27,8 +32,10 @@ def check_Fingerprint_success():
     upload_finger = driver.find_element(By.ID, "voter_fingerprint")
     file = "C://Users//USER//Desktop//School//GraduationProject//FingerPrintVotingSystem//saved_image.bmp"
     upload_finger.send_keys(file)
+    driver.save_screenshot(screenshots + "screenshot3.png")
     do_login = driver.find_element(By.ID, "do_login")
     do_login.click()
+    driver.save_screenshot(screenshots + "screenshot4.png")
     time.sleep(10)
 
 
@@ -52,14 +59,19 @@ def successful_ID_Invalid_Image():
 
 
 def choose_election():
+    driver.save_screenshot(screenshots + "screenshot5.png")
     election = driver.find_element(By.NAME, "20241")
     election.click()
+    driver.save_screenshot(screenshots + "screenshot6.png")
     time.sleep(5)
     candidate = driver.find_element(By.ID, "22222222222")
     candidate.click()
     time.sleep(5)
+    driver.save_screenshot(screenshots + "screenshot20.png")
+    time.sleep(5)
     button = driver.find_element(By.CSS_SELECTOR, "button")
     button.click()
+    driver.save_screenshot(screenshots + "screenshot7.png")
     time.sleep(8)
 
 
@@ -199,6 +211,6 @@ def admin_add_candidate():  # works as well
 if __name__ == "__main__":
     driver = webdriver.Chrome()
     driver.get("http://127.0.0.1:5000")
-    try_selecting_two_candidates()
+    vote_specific_election()
 
     driver.quit()
