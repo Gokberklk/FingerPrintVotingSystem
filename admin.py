@@ -26,7 +26,7 @@ candidates = None
 def check_authentication(view_func):
     @wraps(view_func)
     def wrapped_function(*args, **kwargs):
-        if 'voter' not in session:
+        if 'adminID' not in session:
             return redirect('/')
         return view_func(*args, **kwargs)
 
@@ -57,16 +57,13 @@ def Login():  # This function is used for the selectiong operation of the admin.
 
     if request.method == 'GET':
         return render_template("adminLogin.html")
-
     else:
         adminID = request.form.get('admin_id')
         cursor = AWS_connection.establish_connection()
-        #connectionDB = sqlite3.connect("Government")
-        #cursor = connectionDB.cursor()
         cursor.execute("SELECT * FROM Admin WHERE CitizenID = %s", (adminID,))
         tempAdminID = cursor.fetchone()
         cursor.close()
-       # connectionDB.close()
+
 
         if tempAdminID is None:
             return render_template("adminLogin.html", error="Admin does not exist!")
@@ -74,11 +71,12 @@ def Login():  # This function is used for the selectiong operation of the admin.
             if adminID not in session:
                 session['adminID'] = adminID
 
-            return render_template("admin_fingerprint.html")
+            return redirect("/adminfingerprint")
 
 
 @app.route("/adminfingerprint", methods=['POST', 'GET'])
 def admin_fingerprint_page():
+
     cursor = AWS_connection.establish_connection()
     cursor.execute("SELECT * FROM Citizen WHERE CitizenID = %s", (session.get('adminID'),))
     admin = cursor.fetchone()
@@ -108,34 +106,37 @@ def admin_fingerprint_page():
 @app.route("/operation", methods=['POST', 'GET'])
 @check_authentication
 def AdminMainPage():  # This function is for main page after a succesful login operation of the admin in to the system.
+
     if request.method == 'GET':
+        print("Gete girdi")
         return render_template('admin_fingerprint.html')
 
-    if request.method == 'POST':
-        if 'adminID' not in session:
-            return redirect('/')
-        print("Here dammit")
-        fingerprint = request.files['admin_fingerprint']
 
-        Adminid = session.get('adminID')
-        image_path = os.path.join("ImageSent", f"{Adminid}.bmp")
+    if 'adminID' not in session:
+        return redirect('/')
+
+
+    fingerprint = request.files['admin_fingerprint']
+
+    Adminid = session.get('adminID')
+    image_path = os.path.join("ImageSent", f"{Adminid}.bmp")
 
         # Process the fingerprint
-        b_data = fingerprint.read()
+    b_data = fingerprint.read()
 
         # Fetch admin data from the database
-        cursor = AWS_connection.establish_connection()
-        cursor.execute("SELECT * FROM Citizen WHERE CitizenID = %s", (Adminid,))
-        admin = cursor.fetchone()
-        cursor.close()
+    cursor = AWS_connection.establish_connection()
+    cursor.execute("SELECT * FROM Citizen WHERE CitizenID = %s", (Adminid,))
+    admin = cursor.fetchone()
+    cursor.close()
 
         # Match the fingerprint
-        matching_result = FingerPrintMatching.Check_Fingerprint(admin[-2], b_data)
+    matching_result = FingerPrintMatching.Check_Fingerprint(admin[-2], b_data)
 
-        if matching_result:
-            return render_template('admin_main.html')
-        else:
-            return render_template('adminLogin.html', error="Fingerprint not matched")
+    if matching_result:
+        return render_template('admin_main.html')
+    else:
+        return render_template('adminLogin.html', error="Fingerprint not matched")
 
 
 @app.route("/elections", methods=['GET'])
