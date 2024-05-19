@@ -1,15 +1,21 @@
 import io
+import os
 
 import cv2
 import numpy as np
 from PIL import Image
 from flask import *
 import sqlite3
+
+import AES
+import FingerPrintMatching
+import FingerprintBitmapHeader
 import fingerprintVotingSystem
 import base64
 from functools import wraps
 from flask import session, redirect
 import AWS_connection
+from logger import Logger
 
 app = Flask(__name__)
 app.secret_key = "KawakiWoAmeku"
@@ -73,9 +79,6 @@ def Login():  # This function is used for the selectiong operation of the admin.
 
 @app.route("/adminfingerprint", methods=['POST', 'GET'])
 def admin_fingerprint_page():
-    if request.method == 'GET':
-        return render_template("/")
-
     cursor = AWS_connection.establish_connection()
     cursor.execute("SELECT * FROM Citizen WHERE CitizenID = %s", (session.get('adminID'),))
     admin = cursor.fetchone()
@@ -98,14 +101,41 @@ def admin_fingerprint_page():
         return render_template('adminLogin.html', error="Fingerprint Does not exist!")
 
 
+
+
+
+
 @app.route("/operation", methods=['POST', 'GET'])
 @check_authentication
 def AdminMainPage():  # This function is for main page after a succesful login operation of the admin in to the system.
+    if request.method == 'GET':
+        return render_template('admin_fingerprint.html')
 
-    if 'adminID' in session:
-        return render_template("admin_main.html")
-    else:
-        return redirect(url_for('Login'))
+    if request.method == 'POST':
+        if 'adminID' not in session:
+            return redirect('/')
+        print("Here dammit")
+        fingerprint = request.files['admin_fingerprint']
+
+        Adminid = session.get('adminID')
+        image_path = os.path.join("ImageSent", f"{Adminid}.bmp")
+
+        # Process the fingerprint
+        b_data = fingerprint.read()
+
+        # Fetch admin data from the database
+        cursor = AWS_connection.establish_connection()
+        cursor.execute("SELECT * FROM Citizen WHERE CitizenID = %s", (Adminid,))
+        admin = cursor.fetchone()
+        cursor.close()
+
+        # Match the fingerprint
+        matching_result = FingerPrintMatching.Check_Fingerprint(admin[-2], b_data)
+
+        if matching_result:
+            return render_template('admin_main.html')
+        else:
+            return render_template('adminLogin.html', error="Fingerprint not matched")
 
 
 @app.route("/elections", methods=['GET'])
@@ -352,6 +382,35 @@ def RemoveCandidate():  # This function is used to call the page in which the ad
 
         return redirect(url_for('Candidates'))
 
+@app.route("/GetFingerprint", methods=['POST'])
+def GetFingerprint():
+    Logger.log(f"The Fingerprint with userID {session.get('adminID')} has been received")
+    # newList = []
+    # ImageSent = request.form["EntireImage"] #:list[bytes]
+    # ImageSent = ImageSent[1:len(ImageSent)-1].split(",")
+    # for eachToByte in ImageSent:
+    #     newList.append(int(eachToByte).to_bytes(2,"little"))
+
+    # print(newList,len(newList))
+    currByteString_AES = request.form["EntireImage"]
+    Logger.log("AES Decryption has been started")
+    currByteString = AES.main("decrypt", "KawakiWoAmeku", currByteString_AES)
+    Logger.log("AES Decryption has been done")
+    currByte = str.encode(currByteString, encoding="ISO-8859-1")
+    if currByteString is None:
+        # Decryption Failed, Use here to handle it
+        pass
+    Logger.log("The Fingerprint file has been created")
+    ImageSent_FileWriter = open("ImageSent/" + str(session.get('adminID')) + ".bmp", "wb")
+    ImageSent_FileWriter.write(FingerprintBitmapHeader.assembleBMPHeader(
+        FingerprintBitmapHeader.IMAGE_WIDTH, FingerprintBitmapHeader.IMAGE_HEIGHT,
+        FingerprintBitmapHeader.IMAGE_DEPTH, True))
+    ImageSent_FileWriter.write(currByte)
+    Logger.log("The Fingerprint has been saved")
+    # for eachByte in newList:
+    #     ImageSent_FileWriter.write(eachByte)
+    ImageSent_FileWriter.close()
+    return Response(status=204)  # response with status 204 (no content)
 
 if __name__ == '__main__':
     app.run(debug=True)

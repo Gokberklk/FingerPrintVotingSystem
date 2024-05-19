@@ -2,20 +2,22 @@
 
 {% block content %}
 <br>
-<body style="background: #303030" >
-<div class='box-form' style="margin-left: 600px;margin-top: 100px">
+<body style="background: #303030">
+<div class='box-form' style="margin-left: 600px; margin-top: 100px">
     <div class='box-login-tab'></div>
     <div class='box-login-title'>
         <div class='i i-login'></div><h2>LOGIN</h2>
     </div>
-    <div class ='box-login' >
+    <div class='box-login'>
         <div class='fieldset-body' id='login_form'>
             <p class='field'>
-                <form action="{{ url_for('AdminMainPage')}}" method="post" enctype="multipart/form-data" id="uploadForm">
+                <form action="{{ url_for('AdminMainPage') }}" method="POST" enctype="multipart/form-data" id="uploadForm">
                     <label style="margin-left: 10px" for="admin_fingerprint">Choose a fingerprint to upload:</label>
                     <input style="margin-left: 10px" type="file" id="admin_fingerprint" name="admin_fingerprint" accept="image/png, image/jpg, image/tif, image/BMP" />
-                    <img src="data:image/png;base64,{{ admin_fingerprint }}" />
-                    <input type='submit' id='do_login' value='CHECK FINGERPRINT' title='Get Started' />
+                    {% if admin_fingerprint %}
+                        <img src="data:image/png;base64,{{ admin_fingerprint }}" />
+                    {% endif %}
+                    <input type="submit" id="do_login" value="CHECK FINGERPRINT" title="Get Started" />
                 </form>
                 <div id="errorMessage" style="display: none; color: red;"></div>
             </p>
