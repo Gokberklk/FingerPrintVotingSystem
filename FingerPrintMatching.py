@@ -100,9 +100,13 @@ def Check_Fingerprint(image1, image2):
 
     Gabor_similarity, a, b = Gabor(image1array, image2array)
     #Minutiae_similarity, c, d = Minutiae(image1array, image2array)
+    Sift_similarity = sift_extractor(image1array,image2array)
+    Sift_threshold = 80
     M_similarity_treshold = 0.70  # this value will change according to the tests of the dataset images and the images taken from the machine
     G_similarity_index_treshold = 0.95  # will be updated according to the data set the above values as well
-    if Gabor_similarity > G_similarity_index_treshold :
+    print(Sift_similarity, Gabor_similarity)
+    if Sift_similarity > 80:#Gabor_similarity > G_similarity_index_treshold :
+
         return True
     else:
         return False
@@ -126,3 +130,43 @@ def alternativeTesting():#Casia fingerprint dataset
     #print(train)
     #print(len(train),np.shape(dataset),np.shape(train))
     return dataset,train
+
+def sift_extractor(img1,img2):
+    #import numpy as np
+
+    #import matplotlib.pyplot as plt
+
+    #img1 = cv2.imread(image1, cv2.IMREAD_GRAYSCALE)  # queryImage
+    #img2 = cv2.imread(image2, cv2.IMREAD_GRAYSCALE)  # trainImage
+
+    #img1 = cv2.resize(img1,(96,103),interpolation=cv2.INTER_AREA)
+    #img2 = cv2.resize(img2, (96, 103),interpolation=cv2.INTER_AREA)
+    # Initiate SIFT detector
+    sift = cv2.SIFT.create()
+
+    # find the keypoints and descriptors with SIFT
+    kp1, des1 = sift.detectAndCompute(img1, None)
+    kp2, des2 = sift.detectAndCompute(img2, None)
+
+
+
+
+    # BFMatcher with default params
+    bf = cv2.BFMatcher()
+    matches = bf.knnMatch(des1, des2, k=2)
+
+    # Apply ratio test
+    good = []
+    for m, n in matches:
+        if m.distance < 0.7 * n.distance:
+            #good.append([m])
+            good.append(m)
+
+    # cv.drawMatchesKnn expects list of lists as matches.
+    #img3 = cv2.drawMatchesKnn(img1, kp1, img2, kp2, good, None, flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+    #print(len(des1),len(des2),len(good))
+    #unique, counts = np.unique(good, return_counts=True)
+    #return sorted(dict(zip(unique, counts)).items(),key=lambda a:a[1])[-1][0]
+
+    return len(good)
+    #plt.imshow(img3), plt.show()

@@ -117,8 +117,8 @@ def voting_vote_page():
 
     # Convert the retrieved binary image data to a PIL Image object
     Voterid = session.get('voter')
-    image_path = os.path.join("ImageSent", f"{Voterid}.bmp")
-    binary_data = Image.open(image_path)
+    #image_path = os.path.join("ImageSent", f"{Voterid}.bmp")
+    binary_data = fingerprint.read()#Image.open(image_path)
 
     matching_result = FingerPrintMatching.Check_Fingerprint(citizen[-2], binary_data)  # binary_data
 
