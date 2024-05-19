@@ -1,3 +1,8 @@
+import io
+
+import cv2
+import numpy as np
+from PIL import Image
 from flask import *
 import sqlite3
 import fingerprintVotingSystem
@@ -63,7 +68,34 @@ def Login():  # This function is used for the selectiong operation of the admin.
             if adminID not in session:
                 session['adminID'] = adminID
 
-            return render_template("admin_main.html")
+            return render_template("admin_fingerprint.html")
+
+
+@app.route("/adminfingerprint", methods=['POST', 'GET'])
+def admin_fingerprint_page():
+    if request.method == 'GET':
+        return render_template("/")
+
+    cursor = AWS_connection.establish_connection()
+    cursor.execute("SELECT * FROM Citizen WHERE CitizenID = %s", (session.get('adminID'),))
+    admin = cursor.fetchone()
+    cursor.close()
+    if admin is not None:
+        image1_blob_file = io.BytesIO(admin[-2])
+        image_1 = Image.open(image1_blob_file)
+        image_1 = image_1.convert('L')
+        image1array = np.array(image_1)  # converting the array to an image in base64 in order to display it
+        image1array = np.array(image1array,
+                               dtype=np.uint8)  # this code will be used to display when the voter scans his/her fingerprint from the machine
+        retval, buffer = cv2.imencode('.png',
+                                      image1array)  # the fingerprint which is taken from the machine will be displayed for voter to see
+        image_base64 = base64.b64encode(buffer).decode('utf-8')
+        return render_template('admin_fingerprint.html', admin_fingerprint=image_base64)
+        # connect database fetch the admin with admin id
+        # send it to admin_fingerprint.html with the image
+        # and after that check fingerprint and direct the user to operations
+    else:
+        return render_template('adminLogin.html', error="Fingerprint Does not exist!")
 
 
 @app.route("/operation", methods=['POST', 'GET'])

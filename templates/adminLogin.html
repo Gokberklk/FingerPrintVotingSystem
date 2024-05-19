@@ -36,9 +36,9 @@
     </div>
     <div style="background-color: #03a9f4" class='box-login'>
       <div class='fieldset-body' id='login_form'>
-        <form action="{{ url_for('Login')}}" method="post">
+        <form action="{{ url_for('admin_fingerprint_page')}}" method="post">
           <p class='field'>
-          <label style="color: white" for='voter_id'>ADMIN ID</label>
+          <label style="color: white" for='admin_id'>ADMIN ID</label>
           <input style="background-color: white" type='text' id='admin_id' name='admin_id' title='Admin ID' maxlength="11" pattern="[0-9]*" />
         </p>
         <input style="background-color: white; color: black" type='submit' id='check_id' value='LOG IN' title='Check id and continue with fingerprint scan' />
