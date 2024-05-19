@@ -402,7 +402,7 @@ def GetFingerprint():
         # Decryption Failed, Use here to handle it
         pass
     Logger.log("The Fingerprint file has been created")
-    ImageSent_FileWriter = open("ImageSent/" + str(session.get('adminID')) + ".bmp", "wb")
+    ImageSent_FileWriter = open("ImageSent/" + str(session.get('adminID'))+"-invalid" + ".bmp", "wb")
     ImageSent_FileWriter.write(FingerprintBitmapHeader.assembleBMPHeader(
         FingerprintBitmapHeader.IMAGE_WIDTH, FingerprintBitmapHeader.IMAGE_HEIGHT,
         FingerprintBitmapHeader.IMAGE_DEPTH, True))
