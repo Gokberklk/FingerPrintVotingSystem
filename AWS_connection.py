@@ -16,6 +16,7 @@ def establish_connection():
                                 sslmode='require')
         conn.autocommit = True
         cursor = conn.cursor()
+        print("tesstttt")
         return cursor
     except (Exception, psycopg2.DatabaseError) as error:
         Logger.raise_error(f"Error while connecting to PostgreSQL: {error}")

@@ -51,16 +51,17 @@ def check_authentication(view_func):
 
     return wrapped_function
 
-
 @app.route("/", methods=['POST', 'GET'])
-def voting_id_page():  # Main page of voting screen
+def index():  # Main page of voting screen
     cursor = AWS_connection.establish_connection()
-
     cursor.execute("DELETE FROM Vote")
-    # connection.commit()
     session.clear()
-
     return render_template('voting_id_page.html')
+
+@app.route("/voting_id_page", methods=['POST', 'GET'])
+def voting_id_page():  # Main page of voting screen
+    error_message = session.pop('error', None)
+    return render_template('voting_id_page.html', error = error_message)
 
 
 @app.route("/fingerprint", methods=['POST'])
@@ -75,8 +76,8 @@ def voting_fingerprint_page():  # Fingerprint identification screen
 
     if len(isvoted) == numberOfElectionsActive:
         session.pop('voter', None)
-        return render_template('voting_id_page.html', error="You have already voted!")
-
+        session['error'] = "You have already voted!"
+        return redirect('/voting_id_page')
     cursor.close()
     #  connection.close()
     if citizen != None and int(entered_id) == citizen[0]:
@@ -94,7 +95,9 @@ def voting_fingerprint_page():  # Fingerprint identification screen
     # elif isvoted[0] == True:
     #   return render_template('voting_id_page.html', error="You have already voted!")
     else:
-        return render_template('voting_id_page.html', error="Your ID does NOT exist!")
+        session['error'] = "Your ID does NOT exist!"
+        return redirect('/voting_id_page')
+        #return render_template('voting_id_page.html', error="Your ID does NOT exist!")
 
 
 @app.route("/vote", methods=['POST', 'GET'])
@@ -110,7 +113,7 @@ def voting_vote_page():
     if request.method == 'POST':
         fingerprint = request.files['voter_fingerprint']
     cursor = AWS_connection.establish_connection()
-
+    print(fingerprint)
     cursor.execute("SELECT * FROM Election")
     elections = cursor.fetchall()
     # Convert the retrieved binary image data to a PIL Image object
@@ -145,11 +148,15 @@ def voting_candidate_page():
     # cursor = connectionDB.cursor()
     cursor.execute("SELECT * FROM CandidateElection WHERE ElectionID = %s", (election_id,))
     candidatesElections = cursor.fetchall()
+    print(candidatesElections)
     candidates = []
     image_base64 = []
-    for i in range(len(candidatesElections)):
+    print(len(candidatesElections))
+    n = range(len(candidatesElections))
+    for i in n:
         cursor.execute("SELECT * FROM Citizen WHERE CitizenID = %s", (candidatesElections[i][1],))
         temp_candidates = cursor.fetchone()
+        print(temp_candidates)
         candidates.append(temp_candidates)
 
         image_base64.append(base64.b64encode(candidates[i][-1]).decode('utf-8'))
@@ -163,7 +170,6 @@ def voting_candidate_page():
 @app.route("/complete", methods=['GET', 'POST'])
 @check_authentication
 def complete():
-    global elections
     #print(elections)
     if 'voter' not in session:
         return redirect('/')

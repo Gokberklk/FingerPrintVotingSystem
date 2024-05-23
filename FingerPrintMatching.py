@@ -99,10 +99,10 @@ def Check_Fingerprint(image1, image2):
     image2array=np.array(image_2)
 
     Gabor_similarity, a, b = Gabor(image1array, image2array)
-    Minutiae_similarity, c, d = Minutiae(image1array, image2array)
-    M_similarity_treshold = 0.70  # this value will change according to the tests of the dataset images and the images taken from the machine
-    G_similarity_index_treshold = 0.95  # will be updated according to the data set the above values as well
-    if Gabor_similarity > G_similarity_index_treshold and Minutiae_similarity > M_similarity_treshold:
+    #Minutiae_similarity, c, d = Minutiae(image1array, image2array)
+    #M_similarity_treshold = 0.70  # this value will change according to the tests of the dataset images and the images taken from the machine
+    G_similarity_index_treshold = 0.30  # will be updated according to the data set the above values as well
+    if Gabor_similarity > G_similarity_index_treshold: #and Minutiae_similarity > M_similarity_treshold:
         return True
     else:
         return False
