@@ -77,7 +77,7 @@ def voting_fingerprint_page():  # Fingerprint identification screen
     if len(isvoted) == numberOfElectionsActive:
         session.pop('voter', None)
         session['error'] = "You have already voted!"
-        return redirect('/voting_id_page')
+        return render_template("voting_id_page.html", error = "You have already voted!" )
     cursor.close()
     #  connection.close()
     if citizen != None and int(entered_id) == citizen[0]:
