@@ -142,7 +142,7 @@ def voting_candidate_page():
     cursor = AWS_connection.establish_connection()
     # connectionDB = sqlite3.connect("Government")
     # cursor = connectionDB.cursor()
-    cursor.execute("SELECT * FROM CandidateElection WHERE ElectionID = %s", (election_id,))
+    cursor.execute("SELECT * FROM CandidateElection WHERE ElectionID = %s AND is_active = TRUE", (election_id,))
     candidatesElections = cursor.fetchall()
     candidates = []
     image_base64 = []
@@ -220,8 +220,7 @@ def calculate():
 
     # We access the database and pull candidates of selected elections, their counts and pictures.
     cursor = AWS_connection.establish_connection()
-    # connectionDB = sqlite3.connect("Government")
-    # cursor = connectionDB.cursor()
+
     cursor.execute("SELECT * FROM CandidateElection WHERE ElectionID = %s", (election_id,))
     candidatesElections = cursor.fetchall()
     candidates = []
@@ -237,6 +236,7 @@ def calculate():
 
     percentages = CalculatePercentages(candidatesElections)
 
+    percentages = [format(num, ".2f") for num in percentages]
     print(percentages)
 
     return render_template("election_results.html", candidates=candidates, candidateElections=candidatesElections,

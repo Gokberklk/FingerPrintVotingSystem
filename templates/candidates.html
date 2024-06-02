@@ -33,12 +33,12 @@
           <td>
             <div style="display:flex; gap: 50px" class="button-container">
                 <form method="post" action="{{ url_for('AddCandidate',value=0)}}">
-                <input type="hidden" name="ElectionID" id="ElectionID" value="{{election[0]}}">
+                <input type="hidden" name="ElectionID" id="ElectionID1" value="{{election[0]}}">
               <button style="width: 150px" class="btn btn-primary">Add Candidate</button>
                 </form>
 
                 <form method="post" action="{{ url_for('RemoveCandidate',value=0)}}">
-                <input type="hidden" name="ElectionID" id="ElectionID" value="{{election[0]}}">
+                <input type="hidden" name="ElectionID" id="ElectionID2" value="{{election[0]}}">
               <button style="width: 160px" class="btn btn-danger">Remove Candidate</button>
                 </form>
             </div>

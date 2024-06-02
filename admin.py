@@ -105,11 +105,10 @@ def admin_fingerprint_page():
 
 @app.route("/operation", methods=['POST', 'GET'])
 @check_authentication
-def AdminMainPage():  # This function is for main page after a succesful login operation of the admin in to the system.
+def AdminMainPage():  # This function is for main page after a successful login operation of the admin in to the system.
 
     if request.method == 'GET':
-        print("Gete girdi")
-        return render_template('admin_fingerprint.html')
+        return render_template('admin_main.html')
 
 
     if 'adminID' not in session:
@@ -147,12 +146,10 @@ def Elections():  # This function is used to call the page in which the admin se
     # In this part, all elections from the database are fetched to be shown in the elections page of the admin.
     global elections
     cursor = AWS_connection.establish_connection()
-    #connectionDB = sqlite3.connect("Government")
-    #cursor = connectionDB.cursor()
-    cursor.execute("SELECT * FROM Election")
+
+    cursor.execute("SELECT * FROM Election WHERE is_active = TRUE")
     elections = cursor.fetchall()
     cursor.close()
-   # connectionDB.close()
 
     return render_template("elections.html", elections=elections)  # Fetched elections are send as a parameter.
 
@@ -165,10 +162,10 @@ def RemoveElection():  # This function deletes the selected election from the da
         return redirect("/")
     electionID = request.form.get('ElectionID')
     cursor = AWS_connection.establish_connection()
-    #connectionDB = sqlite3.connect("Government")
-    #cursor = connectionDB.cursor()
-    cursor.execute("DELETE FROM Election WHERE electionID = %s", (electionID,))
-    cursor.execute("SELECT * FROM Election")
+
+    cursor.execute("UPDATE Election SET is_active = FALSE WHERE electionID = %s", (electionID,))
+    cursor.execute("SELECT * FROM Election WHERE is_active = TRUE")
+
     elections = cursor.fetchall()  # Fetching new elections list from the database to show it.
    # connectionDB.commit()
     cursor.close()
@@ -263,7 +260,7 @@ def Candidates():  # This function is used to call the page in which the admin s
     cursor = AWS_connection.establish_connection()
     #connectionDB = sqlite3.connect("Government")
     #cursor = connectionDB.cursor()
-    cursor.execute("SELECT * FROM Election")
+    cursor.execute("SELECT * FROM Election WHERE is_active = TRUE")
     elections = cursor.fetchall()
     cursor.close()
    # connectionDB.close()
@@ -280,9 +277,12 @@ def Candidates():  # This function is used to call the page in which the admin s
     return render_template("candidates.html", elections=elections)
 
 
-@app.route("/candidates", methods=['GET', 'POST'])
+@app.route("/candidates/add", methods=['GET', 'POST'])
 @check_authentication
-def AddCandidate():  # This function is used to call the page in which the admin see candidates.
+def AddCandidate():  # This function is used to call the page in which the admin see candidates.,
+
+
+
     if request.method == 'GET':
         return redirect("/")
     condition = request.args.get('value')
@@ -298,11 +298,12 @@ def AddCandidate():  # This function is used to call the page in which the admin
         electionID = request.form.get('electionID')
 
         cursor = AWS_connection.establish_connection()
-        #connectionDB = sqlite3.connect("Government")
-        #cursor = connectionDB.cursor()
+
         cursor.execute("SELECT * FROM CandidateElection WHERE ElectionID = %s AND CitizenID= %s",
                        (electionID, candidateID))
         isExist = cursor.fetchone()
+
+
 
         if isExist == None:
             cursor.execute("SELECT * FROM Candidate WHERE CitizenID= %s",
@@ -311,15 +312,24 @@ def AddCandidate():  # This function is used to call the page in which the admin
 
             if tempCandidate is None:
                 cursor.execute("INSERT INTO Candidate (CitizenID) VALUES(%s)", (candidateID,))
-      #          connectionDB.commit()
 
             cursor.execute(
                 "INSERT INTO CandidateElection (CountOfVote,CitizenID,ElectionID) VALUES(%s,%s,%s)",
                 (0, candidateID, electionID))
+
+            cursor.execute("UPDATE CandidateElection SET is_active = TRUE WHERE CitizenID = %s and ElectionID = %s",
+                           (candidateID, electionID))
+
       #      connectionDB.commit()
 
             return redirect(url_for('Candidates'))
 
+        elif isExist[3] == False:
+
+             cursor.execute("UPDATE CandidateElection SET is_active = TRUE WHERE CitizenID = %s and ElectionID = %s",
+                             (candidateID, electionID))
+
+             return redirect(url_for('Candidates'))
         else:
             return render_template("addCandidate.html", error="Candidate already exists")
 
@@ -336,8 +346,7 @@ def RemoveCandidate():  # This function is used to call the page in which the ad
         cursor = AWS_connection.establish_connection()
         #connectionDB = sqlite3.connect("Government")
         #cursor = connectionDB.cursor()
-        cursor.execute("SELECT * FROM CandidateElection WHERE ElectionID = %s",
-                       (electionID,))
+        cursor.execute("SELECT * FROM CandidateElection WHERE ElectionID = %s AND is_active = TRUE", (electionID,))
         candidateElections = cursor.fetchall()
 
         candidatesList = []
@@ -361,25 +370,20 @@ def RemoveCandidate():  # This function is used to call the page in which the ad
         candidateID = request.form.get('candidateID')
         electionID = request.form.get('ElectionID')
 
-        #print(candidateID)
-        #print(electionID)
         cursor = AWS_connection.establish_connection()
-        #connectionDB = sqlite3.connect("Government")
-        #cursor = connectionDB.cursor()
-        cursor.execute("DELETE FROM CandidateElection WHERE CitizenID = %s and ElectionID = %s",
-                       (candidateID, electionID))
-       # connectionDB.commit()
+
+
+        cursor.execute("UPDATE CandidateElection SET is_active = FALSE WHERE CitizenID = %s and ElectionID = %s", (candidateID,electionID))
 
         tempCandidate = None
-        cursor.execute("SELECT * FROM CandidateElection WHERE CitizenID = %s", (candidateID,))
+        cursor.execute("SELECT * FROM CandidateElection WHERE CitizenID = %s AND is_active = TRUE", (candidateID,))
         tempCandidate = cursor.fetchone()
 
-        #print(tempCandidate)
 
-        if tempCandidate is None:
-            cursor.execute("DELETE FROM Candidate WHERE CitizenID = %s",
-                           (candidateID,))
-      #      connectionDB.commit()
+
+        cursor.execute("UPDATE Candidate SET is_active = FALSE WHERE CitizenID = %s", (candidateID,))
+
+        cursor.close()
 
         return redirect(url_for('Candidates'))
 
