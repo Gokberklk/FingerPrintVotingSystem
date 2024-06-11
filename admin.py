@@ -5,12 +5,11 @@ import cv2
 import numpy as np
 from PIL import Image
 from flask import *
-import sqlite3
 
 import AES
 import FingerPrintMatching
 import FingerprintBitmapHeader
-import fingerprintVotingSystem
+
 import base64
 from functools import wraps
 from flask import session, redirect
@@ -64,7 +63,6 @@ def Login():  # This function is used for the selectiong operation of the admin.
         tempAdminID = cursor.fetchone()
         cursor.close()
 
-
         if tempAdminID is None:
             return render_template("adminLogin.html", error="Admin does not exist!")
         else:
@@ -76,7 +74,6 @@ def Login():  # This function is used for the selectiong operation of the admin.
 
 @app.route("/adminfingerprint", methods=['POST', 'GET'])
 def admin_fingerprint_page():
-
     cursor = AWS_connection.establish_connection()
     cursor.execute("SELECT * FROM Citizen WHERE CitizenID = %s", (session.get('adminID'),))
     admin = cursor.fetchone()
@@ -99,10 +96,6 @@ def admin_fingerprint_page():
         return render_template('adminLogin.html', error="Fingerprint Does not exist!")
 
 
-
-
-
-
 @app.route("/operation", methods=['POST', 'GET'])
 @check_authentication
 def AdminMainPage():  # This function is for main page after a successful login operation of the admin in to the system.
@@ -110,26 +103,24 @@ def AdminMainPage():  # This function is for main page after a successful login 
     if request.method == 'GET':
         return render_template('admin_main.html')
 
-
     if 'adminID' not in session:
         return redirect('/')
-
 
     fingerprint = request.files['admin_fingerprint']
 
     Adminid = session.get('adminID')
     image_path = os.path.join("ImageSent", f"{Adminid}.bmp")
 
-        # Process the fingerprint
+    # Process the fingerprint
     b_data = fingerprint.read()
 
-        # Fetch admin data from the database
+    # Fetch admin data from the database
     cursor = AWS_connection.establish_connection()
     cursor.execute("SELECT * FROM Citizen WHERE CitizenID = %s", (Adminid,))
     admin = cursor.fetchone()
     cursor.close()
 
-        # Match the fingerprint
+    # Match the fingerprint
     matching_result = FingerPrintMatching.Check_Fingerprint(admin[-2], b_data)
 
     if matching_result:
@@ -141,8 +132,7 @@ def AdminMainPage():  # This function is for main page after a successful login 
 @app.route("/elections", methods=['GET'])
 @check_authentication
 def Elections():  # This function is used to call the page in which the admin see elections.
-    if request.method == 'GET':
-        return redirect("/")
+
     # In this part, all elections from the database are fetched to be shown in the elections page of the admin.
     global elections
     cursor = AWS_connection.establish_connection()
@@ -158,8 +148,6 @@ def Elections():  # This function is used to call the page in which the admin se
 @check_authentication
 def RemoveElection():  # This function deletes the selected election from the database.
     global elections
-    if request.method == 'GET':
-        return redirect("/")
     electionID = request.form.get('ElectionID')
     cursor = AWS_connection.establish_connection()
 
@@ -167,9 +155,9 @@ def RemoveElection():  # This function deletes the selected election from the da
     cursor.execute("SELECT * FROM Election WHERE is_active = TRUE")
 
     elections = cursor.fetchall()  # Fetching new elections list from the database to show it.
-   # connectionDB.commit()
+    # connectionDB.commit()
     cursor.close()
-   # connectionDB.close()
+    # connectionDB.close()
 
     return render_template("elections.html", elections=elections)
 
@@ -192,14 +180,14 @@ def AddElection():  # If the request is POST, this
 
         # Adding the election to the database after checking validity of the data retrieved.
         cursor = AWS_connection.establish_connection()
-        #connectionDB = sqlite3.connect("Government")
-        #cursor = connectionDB.cursor()
+        # connectionDB = sqlite3.connect("Government")
+        # cursor = connectionDB.cursor()
         cursor.execute(
             "INSERT INTO Election (Result,DateOfElection,ElectionTime,Description,EndDate,EndTime) VALUES(%s, %s, %s, %s, %s, %s)",
             (None, date, time, description, endDate, endTime))
-       # connectionDB.commit()
+        # connectionDB.commit()
         cursor.close()
-       # connectionDB.close()
+        # connectionDB.close()
 
         return redirect(url_for('Elections'))
 
@@ -208,14 +196,12 @@ def AddElection():  # If the request is POST, this
 @check_authentication
 def UpdateElection():
     condition = request.args.get('value')
-    if request.method == 'GET':
-        return redirect("/")
     if request.method == 'POST' and condition == None:
 
         electionID = request.form.get('ElectionID')
         cursor = AWS_connection.establish_connection()
-        #connectionDB = sqlite3.connect("Government")
-        #cursor = connectionDB.cursor()
+        # connectionDB = sqlite3.connect("Government")
+        # cursor = connectionDB.cursor()
         cursor.execute("SELECT * FROM Election WHERE electionID = %s", (electionID,))
         updated = cursor.fetchone()
         description = updated[4]
@@ -225,7 +211,7 @@ def UpdateElection():
         endTime = updated[6]
 
         cursor.close()
-       # connectionDB.close()
+        # connectionDB.close()
 
         return render_template("updateElection.html", description=description, date=date, time=time,
                                electionID=electionID, endDate=endDate, endTime=endTime)
@@ -238,14 +224,14 @@ def UpdateElection():
         endDate = request.form.get('endDate')
         endTime = request.form.get('endTime')
         cursor = AWS_connection.establish_connection()
-        #connectionDB = sqlite3.connect("Government")
-        #cursor = connectionDB.cursor()
+        # connectionDB = sqlite3.connect("Government")
+        # cursor = connectionDB.cursor()
         cursor.execute(
             "UPDATE Election SET Description = %s, DateOfElection = %s, ElectionTime = %s, EndDate = %s, EndTime = %s WHERE ElectionID = %s",
             (description, date, time, endDate, endTime, electionID))
-       # connectionDB.commit()
+        # connectionDB.commit()
         cursor.close()
-       # connectionDB.close()
+        # connectionDB.close()
 
         return redirect(url_for('Elections'))
 
@@ -253,17 +239,15 @@ def UpdateElection():
 @app.route("/candidates", methods=['GET', 'POST'])
 @check_authentication
 def Candidates():  # This function is used to call the page in which the admin see candidates.
-    if request.method == 'GET':
-        return redirect("/")
     # In this part, all elections from the database are fetched to be shown in the candidates page of the admin.
     global elections
     cursor = AWS_connection.establish_connection()
-    #connectionDB = sqlite3.connect("Government")
-    #cursor = connectionDB.cursor()
+    # connectionDB = sqlite3.connect("Government")
+    # cursor = connectionDB.cursor()
     cursor.execute("SELECT * FROM Election WHERE is_active = TRUE")
     elections = cursor.fetchall()
     cursor.close()
-   # connectionDB.close()
+    # connectionDB.close()
 
     # Retrieving all candidates from the "Government" database.
     # connectionDB = sqlite3.connect("Government")
@@ -280,11 +264,6 @@ def Candidates():  # This function is used to call the page in which the admin s
 @app.route("/candidates/add", methods=['GET', 'POST'])
 @check_authentication
 def AddCandidate():  # This function is used to call the page in which the admin see candidates.,
-
-
-
-    if request.method == 'GET':
-        return redirect("/")
     condition = request.args.get('value')
 
     if condition == '0':
@@ -303,8 +282,6 @@ def AddCandidate():  # This function is used to call the page in which the admin
                        (electionID, candidateID))
         isExist = cursor.fetchone()
 
-
-
         if isExist == None:
             cursor.execute("SELECT * FROM Candidate WHERE CitizenID= %s",
                            (candidateID,))
@@ -320,16 +297,16 @@ def AddCandidate():  # This function is used to call the page in which the admin
             cursor.execute("UPDATE CandidateElection SET is_active = TRUE WHERE CitizenID = %s and ElectionID = %s",
                            (candidateID, electionID))
 
-      #      connectionDB.commit()
+            #      connectionDB.commit()
 
             return redirect(url_for('Candidates'))
 
         elif isExist[3] == False:
 
-             cursor.execute("UPDATE CandidateElection SET is_active = TRUE WHERE CitizenID = %s and ElectionID = %s",
-                             (candidateID, electionID))
+            cursor.execute("UPDATE CandidateElection SET is_active = TRUE WHERE CitizenID = %s and ElectionID = %s",
+                           (candidateID, electionID))
 
-             return redirect(url_for('Candidates'))
+            return redirect(url_for('Candidates'))
         else:
             return render_template("addCandidate.html", error="Candidate already exists")
 
@@ -344,8 +321,8 @@ def RemoveCandidate():  # This function is used to call the page in which the ad
     if condition == '0':
         electionID = request.form.get('ElectionID')
         cursor = AWS_connection.establish_connection()
-        #connectionDB = sqlite3.connect("Government")
-        #cursor = connectionDB.cursor()
+        # connectionDB = sqlite3.connect("Government")
+        # cursor = connectionDB.cursor()
         cursor.execute("SELECT * FROM CandidateElection WHERE ElectionID = %s AND is_active = TRUE", (electionID,))
         candidateElections = cursor.fetchall()
 
@@ -360,7 +337,7 @@ def RemoveCandidate():  # This function is used to call the page in which the ad
                 candidatesList.append(tempCandidate)
 
         cursor.close()
-       # connectionDB.close()
+        # connectionDB.close()
 
         return render_template("removeCandidate.html", candidatesList=candidatesList, Image=image_base64,
                                electionID=electionID)
@@ -372,20 +349,19 @@ def RemoveCandidate():  # This function is used to call the page in which the ad
 
         cursor = AWS_connection.establish_connection()
 
-
-        cursor.execute("UPDATE CandidateElection SET is_active = FALSE WHERE CitizenID = %s and ElectionID = %s", (candidateID,electionID))
+        cursor.execute("UPDATE CandidateElection SET is_active = FALSE WHERE CitizenID = %s and ElectionID = %s",
+                       (candidateID, electionID))
 
         tempCandidate = None
         cursor.execute("SELECT * FROM CandidateElection WHERE CitizenID = %s AND is_active = TRUE", (candidateID,))
         tempCandidate = cursor.fetchone()
-
-
 
         cursor.execute("UPDATE Candidate SET is_active = FALSE WHERE CitizenID = %s", (candidateID,))
 
         cursor.close()
 
         return redirect(url_for('Candidates'))
+
 
 @app.route("/GetFingerprint", methods=['POST'])
 def GetFingerprint():
@@ -406,7 +382,7 @@ def GetFingerprint():
         # Decryption Failed, Use here to handle it
         pass
     Logger.log("The Fingerprint file has been created")
-    ImageSent_FileWriter = open("ImageSent/" + str(session.get('adminID'))+"-invalid" + ".bmp", "wb")
+    ImageSent_FileWriter = open("ImageSent/" + str(session.get('adminID')) + "-invalid" + ".bmp", "wb")
     ImageSent_FileWriter.write(FingerprintBitmapHeader.assembleBMPHeader(
         FingerprintBitmapHeader.IMAGE_WIDTH, FingerprintBitmapHeader.IMAGE_HEIGHT,
         FingerprintBitmapHeader.IMAGE_DEPTH, True))
@@ -416,6 +392,7 @@ def GetFingerprint():
     #     ImageSent_FileWriter.write(eachByte)
     ImageSent_FileWriter.close()
     return Response(status=204)  # response with status 204 (no content)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -105,8 +105,7 @@ def Check_Fingerprint(image1, image2):
     M_similarity_treshold = 0.70  # this value will change according to the tests of the dataset images and the images taken from the machine
     G_similarity_index_treshold = 0.95  # will be updated according to the data set the above values as well
     print(Sift_similarity, Gabor_similarity)
-    if Sift_similarity > 80:#Gabor_similarity > G_similarity_index_treshold :
-
+    if Gabor_similarity > 0.80:#Gabor_similarity > G_similarity_index_treshold :
         return True
     else:
         return False

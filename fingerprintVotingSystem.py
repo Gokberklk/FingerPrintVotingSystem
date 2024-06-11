@@ -12,7 +12,6 @@ from PIL import Image
 import io
 import cv2
 
-
 import FingerprintBitmapHeader
 from logger import Logger
 
@@ -28,6 +27,7 @@ fingerprint_machine = None
 
 from functools import wraps
 from flask import session, redirect
+from datetime import datetime
 
 
 def add_no_cache_headers(response):
@@ -59,7 +59,6 @@ def voting_id_page():  # Main page of voting screen
     cursor.execute("DELETE FROM Vote")
     # connection.commit()
     session.clear()
-
     return render_template('voting_id_page.html')
 
 
@@ -117,8 +116,8 @@ def voting_vote_page():
 
     # Convert the retrieved binary image data to a PIL Image object
     Voterid = session.get('voter')
-    #image_path = os.path.join("ImageSent", f"{Voterid}.bmp")
-    binary_data = fingerprint.read()#Image.open(image_path)
+    # image_path = os.path.join("ImageSent", f"{Voterid}.bmp")
+    binary_data = fingerprint.read()  # Image.open(image_path)
 
     matching_result = FingerPrintMatching.Check_Fingerprint(citizen[-2], binary_data)  # binary_data
 
@@ -199,17 +198,24 @@ def election_results():
     cursor = AWS_connection.establish_connection()
     # connectionDB = sqlite3.connect("Government")
     # cursor = connectionDB.cursor()
+    elections = []
     cursor.execute("SELECT * FROM Election")
     electionList = cursor.fetchall()
     cursor.close()
     # connectionDB.close()
+    current_datetime = datetime.now()
+    for election in electionList:
+        election_end_str = f"{election[5]} {election[6]}"
+        election_end = datetime.strptime(election_end_str, "%Y-%m-%d %H:%M:%S")
+        if election_end < current_datetime:
+            elections.append(election)
 
     # We have 2 forms in results page. First one is for selecting an election to see results of it,
     # and the second one displays the results of the selected election.
 
     form = 1
 
-    return render_template("election_results.html", elections=electionList, form=1)
+    return render_template("election_results.html", elections=elections, form=1)
     # else:
     #   return render_template("election_results.html", error="No elections being held!", form=1)
 
@@ -275,7 +281,7 @@ def GetFingerprint():
         # Decryption Failed, Use here to handle it
         pass
     Logger.log("The Fingerprint file has been created")
-    ImageSent_FileWriter = open("ImageSent/" + str(citizen[0])+"-invalid" + ".bmp", "wb")
+    ImageSent_FileWriter = open("ImageSent/" + str(citizen[0]) + "-invalid" + ".bmp", "wb")
     ImageSent_FileWriter.write(FingerprintBitmapHeader.assembleBMPHeader(
         FingerprintBitmapHeader.IMAGE_WIDTH, FingerprintBitmapHeader.IMAGE_HEIGHT,
         FingerprintBitmapHeader.IMAGE_DEPTH, True))
