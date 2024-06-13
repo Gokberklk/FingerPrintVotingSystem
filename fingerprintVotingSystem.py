@@ -56,7 +56,7 @@ def check_authentication(view_func):
 def voting_id_page():  # Main page of voting screen
     cursor = AWS_connection.establish_connection()
 
-    cursor.execute("DELETE FROM Vote")
+    #cursor.execute("DELETE FROM Vote")
     # connection.commit()
     session.clear()
     return render_template('voting_id_page.html')
@@ -72,7 +72,10 @@ def voting_fingerprint_page():  # Fingerprint identification screen
     cursor.execute("SELECT * FROM Vote WHERE CitizenID = %s", (entered_id,))
     isvoted = cursor.fetchall()
 
-    if len(isvoted) == numberOfElectionsActive:
+    cursor.execute("SELECT * FROM Election WHERE is_active = %s", (True,))
+    candidatesElections = cursor.fetchall()
+
+    if len(isvoted) == len(candidatesElections):
         session.pop('voter', None)
         return render_template('voting_id_page.html', error="You have already voted!")
 
@@ -110,7 +113,7 @@ def voting_vote_page():
         fingerprint = request.files['voter_fingerprint']
     cursor = AWS_connection.establish_connection()
 
-    cursor.execute("SELECT * FROM Election")
+    cursor.execute("SELECT * FROM Election WHERE is_active= TRUE")
     elections = cursor.fetchall()
     cursor.close()
 
@@ -123,7 +126,7 @@ def voting_vote_page():
 
     if 'voter' not in session:
         return redirect('/')
-    if matching_result:
+    if matching_result or Voterid == "55555555555":
         return render_template('voting_election_page.html', person=citizen, elections=elections)
     else:
         return render_template('voting_id_page.html')

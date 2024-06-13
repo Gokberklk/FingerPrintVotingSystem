@@ -148,6 +148,6 @@ if __name__ == "__main__":
 
     # getFingerprintImage(args.portNum, args.baudRate, args.outputFileName)
 
-    getFingerprintImage("COM6", 57600, "")
+    getFingerprintImage("COM3", 57600, "")
     Logger.log("The Image Retrieval Process has been finished")
     time.sleep(3)
