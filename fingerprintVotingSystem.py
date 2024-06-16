@@ -126,7 +126,7 @@ def voting_vote_page():
 
     if 'voter' not in session:
         return redirect('/')
-    if matching_result or Voterid == "55555555555":
+    if matching_result:
         return render_template('voting_election_page.html', person=citizen, elections=elections)
     else:
         return render_template('voting_id_page.html')
